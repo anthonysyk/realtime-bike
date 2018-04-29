@@ -15,6 +15,22 @@ case class Station(
                     last_update: Long
                   )
 
+object Station {
+  import io.circe._
+  import io.circe.generic.semiauto._
+  import io.circe.parser._
+  import utils.circe.CirceHelper._
+
+  implicit val decoderStation: Decoder[Station] = deriveDecoder[Station]
+  implicit val encoderStation: Encoder[Station] = deriveEncoder[Station]
+  implicit val decoderPosition: Decoder[Position] = deriveDecoder[Position]
+  implicit val encoderPosition: Encoder[Position] = deriveEncoder[Position]
+
+  def fromStationListJson(string: String): Seq[Either[Error, Station]] = {
+    parse(string).getRight.asArray.getOrElse(Nil).map(_.as[Station])
+  }
+}
+
 case class Position(
                      lat: Double,
                      lng: Double

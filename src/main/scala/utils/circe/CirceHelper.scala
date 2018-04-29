@@ -1,29 +1,27 @@
 package utils.circe
 
-import io.circe
 import io.circe.Json
-import utils.circe
 import utils.generic.Pure
 
 import scala.reflect.ClassTag
 
 object CirceHelper {
 
-  implicit class EitherCirceEnricher[T](either: Either[io.circe.Error, T])(implicit pure: Pure[T]) {
+  implicit val pureString = new Pure[String] {
+    override def empty: String = ""
+  }
 
-    private implicit val pureString = new Pure[String] {
-      override def empty: String = ""
-    }
+  implicit val pureJson = new Pure[io.circe.Json] {
+    override def empty: Json = Json.Null
+  }
 
-    private implicit val pureJson = new Pure[Json] {
-      override def empty: Json = Json.Null
-    }
+  implicit def pureArr[T: ClassTag](implicit p: Pure[T]) = new Pure[Array[T]] {
+    override def empty: Array[T] = Array.empty[T]
+  }
 
-    private implicit def pureArr[T: ClassTag] = new Pure[Array[T]] {
-      override def empty: Array[T] = Array.empty[T]
-    }
+  implicit class EitherCirceEnricher[L <: io.circe.Error, R](either: Either[L, R]) {
 
-    def getRight: T = either.right.toOption.getOrElse(pure.empty)
+    def getRight(implicit pure: Pure[R]): R = either.right.toOption.getOrElse(pure.empty)
   }
 
 }
