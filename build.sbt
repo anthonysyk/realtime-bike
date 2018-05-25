@@ -24,4 +24,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser"
 ).map(_ % circeVersion)
 
+
+libraryDependencies ++= Seq(
+  "org.versatile-flow" %% "versatile-library" % "0.1"
+)
+
 scalacOptions := Seq("-Xexperimental", "-unchecked", "-deprecation")

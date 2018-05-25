@@ -12,7 +12,7 @@ import webservice.TickActor.FetchStationsStatus
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-object JCDecauxFetcher {
+object StationCollector {
 
   def main(args: Array[String]): Unit = {
 
@@ -21,13 +21,10 @@ object JCDecauxFetcher {
     val producer: StationProducer = new StationProducer
 
     AkkaService.system.scheduler.schedule(5.seconds, 1.minute) {
-
       tickActor ! FetchStationsStatus(AkkaService, producer)
-
     }
 
   }
-
 }
 
 class TickActor extends Actor {

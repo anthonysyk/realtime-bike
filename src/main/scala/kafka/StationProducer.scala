@@ -1,44 +1,21 @@
 package kafka
 
-import java.util.concurrent.Future
-
 import io.circe.syntax._
-import models.{KafkaLog, Station}
-import org.apache.kafka.clients.producer.{ProducerConfig, ProducerRecord, RecordMetadata}
+import models.Station
+import org.apache.kafka.clients.producer.ProducerRecord
 
 
-class StationProducer {
+class StationProducer extends KafkaProducerHelper[Int, Array[Byte]] {
+  override val topic: String = Topics.STATION_TOPIC
+  override val logsTopic: String = Topics.STATION_LOGS_TOPIC
 
-  import org.apache.kafka.clients.producer.KafkaProducer
+  def createStationRecord(station: Station) = new ProducerRecord[Int, Array[Byte]](Topics.STATION_TOPIC, station.number, station.asJson.noSpaces.getBytes)
 
-  val props = new java.util.Properties()
-  props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-  props.put(ProducerConfig.CLIENT_ID_CONFIG, "StationProducer")
-  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerSerializer")
-  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer")
+  def sendStationsStatus(stations: Seq[Station]): Unit = {
 
-  val stationProducer = new KafkaProducer[Integer, Array[Byte]](props)
+    val records: Seq[ProducerRecord[Int, Array[Byte]]] = stations.map(createStationRecord)
 
-  val logsProducer = new KafkaProducer[Integer, Array[Byte]](props)
-
-  def createStationRecord(station: Station) = new ProducerRecord[Integer, Array[Byte]](Topics.STATION_TOPIC, station.number, station.asJson.noSpaces.getBytes)
-
-  def sendStationsStatus(stations: Seq[Station]): Seq[Future[RecordMetadata]] = {
-
-    val records = stations.map(createStationRecord)
-
-    // TODO: make it generic PublishAndLog
-    records.map { record =>
-      val eventuallyMeta: Future[RecordMetadata] = stationProducer.send(record)
-
-      val kafkaLog: KafkaLog = KafkaLog.fromRecordMetadata(eventuallyMeta.get(), record.key(), new String(record.value()))
-
-      val logRecord = new ProducerRecord[Integer, Array[Byte]](Topics.STATION_LOGS_TOPIC, kafkaLog.fid, kafkaLog.asJson.noSpaces.getBytes)
-
-      logsProducer.send(logRecord)
-    }
+    records.foreach(record => sendEventWithLogs(record))
 
   }
-
-
 }
