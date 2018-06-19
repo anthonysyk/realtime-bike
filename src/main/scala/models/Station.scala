@@ -19,7 +19,7 @@ object Station {
   import io.circe._
   import io.circe.generic.semiauto._
   import io.circe.parser._
-  import utils.circe.CirceHelper._
+  import utils.CirceHelper._
 
   implicit val decoderStation: Decoder[Station] = deriveDecoder[Station]
   implicit val encoderStation: Encoder[Station] = deriveEncoder[Station]

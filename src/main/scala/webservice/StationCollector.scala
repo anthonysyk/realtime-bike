@@ -3,7 +3,7 @@ package webservice
 import java.util.concurrent.Future
 
 import akka.actor.{Actor, Props}
-import kafka.StationProducer
+import kafka.{KafkaProducerHelper, StationProducer}
 import models.Station
 import org.apache.kafka.clients.producer.RecordMetadata
 import utils.date.DateHelper
@@ -34,7 +34,7 @@ class TickActor extends Actor {
       val stations: Seq[Station] = maybeResponse.map(Station.fromStationListJson).getOrElse(Nil).flatMap(_.right.toOption)
       println(s"[${DateHelper.nowReadable}] ${stations.length} stations récupérées")
       // Producer write into topic
-      val logs: Seq[Future[RecordMetadata]] = producer.sendStationsStatus(stations)
+      producer.sendStationsStatus(stations)
     }
   }
 }
