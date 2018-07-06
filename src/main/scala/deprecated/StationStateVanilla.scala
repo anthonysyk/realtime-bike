@@ -1,7 +1,8 @@
-package kafka
+package deprecated
 
 import java.util.Properties
 
+import config.AppConfig
 import io.circe.parser._
 import models.Station
 import org.apache.kafka.common.serialization.Serdes
@@ -10,7 +11,7 @@ import org.apache.kafka.streams.kstream._
 import org.apache.kafka.streams.state.{KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore}
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig}
 
-object StationState {
+object StationStateVanilla {
 
   val streamingConfig: Properties = {
     val props = new Properties()
@@ -26,7 +27,7 @@ object StationState {
 
     val builder = new StreamsBuilder
 
-    val kstream: KStream[Int, Array[Byte]] = builder.stream[Int, Array[Byte]](Topics.STATION_TOPIC)
+    val kstream: KStream[Int, Array[Byte]] = builder.stream[Int, Array[Byte]](AppConfig.station_topic)
     //      .mapValues[String](value => new String(value))
     //      .filter((_, v) => v.isDefined)
     //      .mapValues[Station](_.get)

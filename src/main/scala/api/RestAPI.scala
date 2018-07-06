@@ -6,8 +6,8 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.{complete, get, path, _}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+import deprecated.StationStateVanilla
 import io.circe.syntax._
-import kafka.StationState
 
 import scala.concurrent.ExecutionContextExecutor
 

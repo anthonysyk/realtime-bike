@@ -1,11 +1,7 @@
 package webservice
 
-import java.util.concurrent.Future
-
 import akka.actor.{Actor, Props}
-import kafka.{KafkaProducerHelper, StationProducer}
 import models.Station
-import org.apache.kafka.clients.producer.RecordMetadata
 import utils.date.DateHelper
 import webservice.TickActor.FetchStationsStatus
 
@@ -28,13 +24,28 @@ object StationCollector {
 }
 
 class TickActor extends Actor {
+
+  // TODO: make this state immutable (cats)
+  // TODO: Maybe use akka persistance ?
+  var currentState: Map[Int, Station] = Map.empty[Int, Station]
+
   override def receive: Receive = {
     case FetchStationsStatus(service, producer) => service.getStationsList.andThen { case response =>
       val maybeResponse = response.toOption.flatMap(_.right.toOption)
       val stations: Seq[Station] = maybeResponse.map(Station.fromStationListJson).getOrElse(Nil).flatMap(_.right.toOption)
       println(s"[${DateHelper.nowReadable}] ${stations.length} stations récupérées")
+      val differentStations = stations.filter(station => currentState.get(station.number) match {
+        case Some(stateStation) => stateStation.equals(station)
+        case None => true
+      })
+      println(s"[${DateHelper.nowReadable}] ${differentStations.length} stations différentes")
       // Producer write into topic
-      producer.sendStationsStatus(stations)
+      producer.sendStationsStatus(differentStations)
+      for {
+        s <- differentStations
+      } yield {
+        currentState += (s.number -> s)
+      }
     }
   }
 }

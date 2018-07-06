@@ -1,5 +1,9 @@
 import models.Station
 import org.scalatest.FunSuite
+import io.circe.parser._
+import io.circe.syntax._
+import utils.CirceHelper._
+
 
 class SerDeTests extends FunSuite{
 
@@ -12,5 +16,18 @@ class SerDeTests extends FunSuite{
     result.foreach(println)
 
   }
+
+  test("serde tuple") {
+
+    val tuple = 1 -> 2
+
+    val bytes = tuple.asJson.noSpaces.getBytes()
+
+    println(parse(new String(bytes)).getRight.as[(Int, Int)].right.toOption)
+
+
+  }
+
+
 
 }
