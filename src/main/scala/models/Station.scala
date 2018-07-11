@@ -1,5 +1,9 @@
 package models
 
+import utils.{PathHelper, Writer}
+
+import io.circe.syntax._
+
 case class Station(
                     number: Int,
                     name: String,
@@ -14,9 +18,12 @@ case class Station(
                     available_bikes: Int,
                     last_update: Long,
                     state: Option[StationState]
-                  )
+                  ) {
+  lazy val externalId = s"${number}_$contract_name"
+}
 
 object Station {
+
   import io.circe._
   import io.circe.generic.semiauto._
   import io.circe.parser._
@@ -37,7 +44,7 @@ object Station {
     number = 0,
     name = "no name",
     address = "no address",
-    position = Position(0.0,0.0),
+    position = Position(0.0, 0.0),
     banking = false,
     bonus = false,
     status = "no status",
@@ -57,3 +64,31 @@ case class StationState(
                          bikes_droped: Int,
                          availability: Int
                        )
+
+
+case class StationReferential(id: String, number: Int, contract_name: String)
+
+object StationReferential {
+
+  import io.circe.generic.semiauto._
+
+  implicit val encoder = deriveEncoder[StationReferential]
+  implicit val decoder = deriveDecoder[StationReferential]
+
+  def updateReferentials(stations: Seq[Station]) = {
+
+    val ids = stations.map { s =>
+      import s._
+      StationReferential(
+        externalId,
+        number,
+        contract_name
+      )
+    }.asJson.noSpaces
+
+    Writer.write(s"${PathHelper.ProjectReference}/stations-ids.json", ids)
+    println("Référentiel mis à jour")
+
+  }
+
+}

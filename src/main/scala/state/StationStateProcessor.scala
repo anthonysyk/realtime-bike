@@ -1,12 +1,7 @@
 package state
 
 import java.util.Properties
-import java.util.concurrent.Executors
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import com.lightbend.kafka.scala.iq.http.{HttpRequester, KeyValueFetcher}
-import com.lightbend.kafka.scala.iq.services.{LocalStateStoreQuery, MetadataService}
 import com.lightbend.kafka.scala.streams.{KStreamS, StreamsBuilderS}
 import config.AppConfig
 import io.circe.parser._
@@ -16,8 +11,6 @@ import org.apache.kafka.streams.kstream.{Materialized, Serialized}
 import org.apache.kafka.streams.state.HostInfo
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import utils.SerdeHelper
-
-import scala.concurrent.ExecutionContext
 
 object StationStateProcessor {
 
@@ -37,7 +30,7 @@ object StationStateProcessor {
 
   val builder = new StreamsBuilderS
 
-  val stations: KStreamS[Int, String] = builder.stream[Int, String](AppConfig.station_topic)
+  val stations: KStreamS[String, String] = builder.stream[String, String](AppConfig.station_topic)
 
   import utils.CirceHelper._
 
@@ -45,13 +38,14 @@ object StationStateProcessor {
 
   def getAvailability(taken: Int, total: Int): Int = if(taken != 0) {100 - 100/(total/taken)} else 100
 
-  stations.filter((k,v) => k == 217).foreach((k,v) => println(v))
+  stations.filter((k,v) => k == "217_Valence").foreach((k,v) => println(v))
+
   /* ACCESS_STATION_STATE */
   stations.flatMapValues(parse(_).getRight.as[Station].right.toOption)
-    .groupByKey(Serialized.`with`(integerSerde, stationSerde))
+    .groupByKey(Serialized.`with`(stringSerde, stationSerde))
     .aggregate(
       () => Station.empty,
-      (_: Int, current: Station, acc: Station) => {
+      (_: String, current: Station, acc: Station) => {
         val deltaBikes = current.available_bikes - acc.available_bikes
         val bikesDropped = if(deltaBikes > 0) deltaBikes else 0
         val bikesTaken = if(deltaBikes < 0) Math.abs(deltaBikes) else 0
@@ -65,9 +59,9 @@ object StationStateProcessor {
         )
       },
       Materialized.as(ACCESS_STATION_STATE)
-        .withKeySerde(integerSerde)
+        .withKeySerde(stringSerde)
         .withValueSerde(stationSerde)
-    ).toStream.filter((k,v) => k == 217).foreach((x,y) => println(y))
+    ).toStream.foreach((x,y) => println(y))
 
 
   val streams = new KafkaStreams(builder.build, streamsConfiguration)

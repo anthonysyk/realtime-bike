@@ -1,9 +1,11 @@
 package webservice
 
 import akka.actor.{Actor, Props}
-import models.Station
+import models.{Station, StationReferential}
 import utils.date.DateHelper
 import webservice.TickActor.FetchStationsStatus
+import io.circe.parser._
+import io.circe.syntax._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -39,6 +41,9 @@ class TickActor extends Actor {
         case None => true
       })
       println(s"[${DateHelper.nowReadable}] ${differentStations.length} stations différentes")
+
+      if(currentState.isEmpty)  StationReferential.updateReferentials(stations)
+
       // Producer write into topic
       producer.sendStationsStatus(differentStations)
       for {
