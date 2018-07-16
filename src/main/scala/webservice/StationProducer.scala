@@ -2,10 +2,10 @@ package webservice
 
 import config.AppConfig
 import io.circe.syntax._
-import kafka.KafkaProducerHelper
 import models.Station
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
+import versatile.kafka.KafkaProducerHelper
 
 
 class StationProducer extends KafkaProducerHelper[String, String] {

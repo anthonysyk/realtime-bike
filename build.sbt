@@ -5,8 +5,8 @@ version := "0.1"
 scalaVersion := "2.11.8"
 
 val kafkaV = "1.0.1"
-val kafka_streams_scala_version = "0.2.1"
-val kafka_streams_query_version = "0.1.0"
+val kafka_streams_scala_version = "0.1.2"
+val kafka_streams_query_version = "0.1.1"
 
 libraryDependencies ++= Seq(
   "org.apache.kafka" % "kafka_2.11" % kafkaV,

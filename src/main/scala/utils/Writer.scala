@@ -19,4 +19,6 @@ object PathHelper {
 
   lazy val ProjectReference = getCanonical("./src/main/resources")
 
+  lazy val StateStoreDirectory = getCanonical("./local_state_data")
+
 }

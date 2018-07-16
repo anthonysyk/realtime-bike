@@ -4,8 +4,6 @@ import akka.actor.{Actor, Props}
 import models.{Station, StationReferential}
 import utils.date.DateHelper
 import webservice.TickActor.FetchStationsStatus
-import io.circe.parser._
-import io.circe.syntax._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -23,6 +21,7 @@ object StationCollector {
     }
 
   }
+
 }
 
 class TickActor extends Actor {
@@ -42,7 +41,7 @@ class TickActor extends Actor {
       })
       println(s"[${DateHelper.nowReadable}] ${differentStations.length} stations différentes")
 
-      if(currentState.isEmpty)  StationReferential.updateReferentials(stations)
+      if (currentState.isEmpty) StationReferential.updateReferentials(stations)
 
       // Producer write into topic
       producer.sendStationsStatus(differentStations)

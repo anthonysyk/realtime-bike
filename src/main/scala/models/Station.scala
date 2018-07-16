@@ -27,7 +27,7 @@ object Station {
   import io.circe._
   import io.circe.generic.semiauto._
   import io.circe.parser._
-  import utils.CirceHelper._
+  import versatile.utils.CirceHelper._
 
   implicit val decoderStation: Decoder[Station] = deriveDecoder[Station]
   implicit val encoderStation: Encoder[Station] = deriveEncoder[Station]
@@ -62,8 +62,16 @@ case class Position(lat: Double, lng: Double)
 case class StationState(
                          bikes_taken: Int,
                          bikes_droped: Int,
-                         availability: Int
+                         availability: Double
                        )
+
+object StationState {
+
+  def getAvailability(used: Int, total: Int): Double = if (used != 0 && (total % used) != 0) {
+    100 - (100 / (total.toDouble / used.toDouble))
+  } else 100
+
+}
 
 
 case class StationReferential(id: String, number: Int, contract_name: String)

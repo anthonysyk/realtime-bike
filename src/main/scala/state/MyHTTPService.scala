@@ -22,10 +22,15 @@ class MyHTTPService(
   // define the routes
   val routes: Flow[HttpRequest, HttpResponse, Any] = {
     pathPrefix("station") {
-      (get & pathPrefix("access") & path(Segment)) { hostKey =>
-        complete {
-          fetcher.fetchWindowStationsStateByKey(hostKey).map(_.asJson)
-        }
+      (get & pathPrefix("access") & path(Segment)) {
+        case "ALL" =>
+          complete {
+            fetcher.fetchAllAccessCountSummary.map(_.asJson)
+          }
+        case hostKey@_ =>
+          complete {
+            fetcher.fetchWindowStationsStateByKey(hostKey).map(_.asJson)
+          }
       }
     }
   }
