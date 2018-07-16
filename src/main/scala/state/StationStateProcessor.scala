@@ -24,7 +24,6 @@ import scala.concurrent.ExecutionContext
 
 object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
-  final val HOST_INFO = new HostInfo("localhost", 9000)
   final val ACCESS_STATION_STATE = "access-station-state"
   final val AVAILABILITY_STATE = "availability-state"
 

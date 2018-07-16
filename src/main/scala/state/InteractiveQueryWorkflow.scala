@@ -33,7 +33,7 @@ trait InteractiveQueryWorkflow extends LazyLogging {
     val streams: KafkaStreams = createStreams()
 
     // Start the Restful proxy for servicing remote access to state stores
-    val restService = startRestProxy(streams, restEndpoint, system, materializer)
+    startRestProxy(streams, restEndpoint, system, materializer)
 
     streams.start()
 
