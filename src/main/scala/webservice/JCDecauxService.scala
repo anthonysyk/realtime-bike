@@ -4,14 +4,14 @@ import config.AppConfig
 
 import scala.concurrent.Future
 
-class JCDecauxService() extends ServiceHelper {
+class JCDecauxService(config: AppConfig) extends ServiceHelper {
 
-  val stationsUrl = s"${AppConfig.api_url}/stations"
+  val stationsUrl = s"${config.api_url}/stations"
 
-  val contractsUrl = s"${AppConfig.api_url}/contracts"
+  val contractsUrl = s"${config.api_url}/contracts"
 
   val apiKeyMap = Map(
-    "apiKey" -> AppConfig.api_key
+    "apiKey" -> config.api_key
   )
 
   def getContactsList: Future[Either[String, String]] = doGet(contractsUrl)
@@ -40,7 +40,7 @@ object TestService {
   import concurrent.ExecutionContext.Implicits.global
 
   def main(args: Array[String]): Unit = {
-    val service = new JCDecauxService()
+    val service = new JCDecauxService(new AppConfig)
 
     service.getStationInformation(9087, "Marseille").andThen { case response =>
       println(response)

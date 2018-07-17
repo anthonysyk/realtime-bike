@@ -8,9 +8,9 @@ import org.apache.kafka.common.serialization.StringSerializer
 import versatile.kafka.KafkaProducerHelper
 
 
-class StationProducer extends KafkaProducerHelper[String, String] {
-  override val topic: String = AppConfig.station_topic
-  override val logsTopic: String = AppConfig.station_logs_topic
+class StationProducer(config: AppConfig) extends KafkaProducerHelper[String, String] {
+  override val topic: String = config.station_topic
+  override val logsTopic: String = config.station_logs_topic
   override def keySerializer: String = classOf[StringSerializer].getName
   override def valueSerializer: String = classOf[StringSerializer].getName
 

@@ -104,7 +104,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
       val streamsConfiguration = new Properties()
       streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, s"state-${scala.util.Random.nextInt(100)}")
       streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "station-state")
-      streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.brokers)
+      streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.brokers)
       // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
       // Note: To re-run the demo, you need to use the offset reset tool:
       // https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Streams+Application+Reset+Tool
@@ -127,7 +127,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
     implicit val builder = new StreamsBuilderS
 
-    val stations: KStreamS[String, String] = builder.stream(AppConfig.station_topic, Consumed.`with`(stringSerde, stringSerde))
+    val stations: KStreamS[String, String] = builder.stream(config.station_topic, Consumed.`with`(stringSerde, stringSerde))
 
     createStationStateSummary(stations)
 

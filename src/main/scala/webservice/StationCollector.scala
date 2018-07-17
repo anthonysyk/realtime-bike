@@ -1,6 +1,7 @@
 package webservice
 
 import akka.actor.{Actor, Props}
+import config.AppConfig
 import models.{Station, StationReferential}
 import utils.date.DateHelper
 import webservice.TickActor.FetchStationsStatus
@@ -10,15 +11,21 @@ import scala.concurrent.duration._
 
 object StationCollector {
 
+  val appConfig = new AppConfig
+
   def main(args: Array[String]): Unit = {
 
-    val AkkaService: JCDecauxService = new JCDecauxService()
+    val AkkaService: JCDecauxService = new JCDecauxService(appConfig)
     val tickActor = AkkaService.system.actorOf(Props[TickActor], name = "tick-actor")
-    val producer: StationProducer = new StationProducer
+    val producer: StationProducer = new StationProducer(appConfig)
 
     AkkaService.system.scheduler.schedule(5.seconds, 1.minute) {
       tickActor ! FetchStationsStatus(AkkaService, producer)
     }
+
+  }
+
+  def startCollector(config: AppConfig) = {
 
   }
 
