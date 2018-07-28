@@ -2,7 +2,7 @@ import models.Station
 import org.scalatest.FunSuite
 import io.circe.parser._
 import io.circe.syntax._
-import utils.CirceHelper._
+import versatile.utils.CirceHelper._
 
 
 class SerDeTests extends FunSuite{

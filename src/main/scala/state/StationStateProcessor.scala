@@ -9,7 +9,6 @@ import com.lightbend.kafka.scala.iq.http.{HttpRequester, KeyValueFetcher}
 import com.lightbend.kafka.scala.iq.serializers.Serializers
 import com.lightbend.kafka.scala.iq.services.{LocalStateStoreQuery, MetadataService}
 import com.lightbend.kafka.scala.streams.{KStreamS, StreamsBuilderS}
-import config.AppConfig
 import io.circe.parser._
 import io.circe.syntax._
 import models.{Serde, Station, StationState}
@@ -94,7 +93,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
         Materialized.as(ACCESS_STATION_STATE)
           .withKeySerde(stringSerde)
           .withValueSerde(stringSerde)
-      ).toStream.to("State", Produced.`with`(stringSerde, stringSerde))
+      ).toStream.to("State")(Produced.`with`(stringSerde, stringSerde))
 
   }
 
@@ -127,7 +126,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
     implicit val builder = new StreamsBuilderS
 
-    val stations: KStreamS[String, String] = builder.stream(config.station_topic, Consumed.`with`(stringSerde, stringSerde))
+    val stations: KStreamS[String, String] = builder.stream(config.station_topic)(Consumed.`with`(stringSerde, stringSerde))
 
     createStationStateSummary(stations)
 

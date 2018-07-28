@@ -1,10 +1,11 @@
 package webservice
 
 import config.AppConfig
+import versatile.web.WebClient
 
 import scala.concurrent.Future
 
-class JCDecauxService(config: AppConfig) extends ServiceHelper {
+class JCDecauxService(config: AppConfig) extends WebClient {
 
   val stationsUrl = s"${config.api_url}/stations"
 

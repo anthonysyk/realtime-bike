@@ -1,5 +1,7 @@
 package config
 
+import config.AppConfig.Environnement
+
 class AppConfig {
 
   final val api_key = "0d23298797f5e87734c13efe39fcc4013dba6cf7"
@@ -7,6 +9,16 @@ class AppConfig {
   final val brokers = "localhost:9092"
   final val station_topic = "Station"
   final val station_logs_topic = "StationLogs"
-  final val environment = "local"
+  final val environment = Environnement.PRODUCTION
+
+}
+
+
+object AppConfig {
+
+  object Environnement extends Enumeration {
+    val LOCAL = Value("local")
+    val PRODUCTION = Value("production")
+  }
 
 }

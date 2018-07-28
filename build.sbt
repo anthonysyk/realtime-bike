@@ -5,7 +5,7 @@ version := "0.1"
 scalaVersion := "2.11.8"
 
 val kafkaV = "1.0.1"
-val kafka_streams_scala_version = "0.1.2"
+val kafka_streams_scala_version = "0.2.1"
 val kafka_streams_query_version = "0.1.1"
 
 libraryDependencies ++= Seq(
@@ -15,7 +15,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.5.11",
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "com.lightbend" %% "kafka-streams-scala" % kafka_streams_scala_version,
-  "com.lightbend" %% "kafka-streams-query" % kafka_streams_query_version
+  "com.lightbend" %% "kafka-streams-query" % kafka_streams_query_version,
+  "net.manub" %% "scalatest-embedded-kafka" % "1.0.0"
 )
 
 val circeVersion = "0.9.1"

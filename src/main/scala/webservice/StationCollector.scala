@@ -4,6 +4,7 @@ import akka.actor.{Actor, Props}
 import config.AppConfig
 import models.{Station, StationReferential}
 import utils.date.DateHelper
+import versatile.kafka.EmbeddedKafkaHelper
 import webservice.TickActor.FetchStationsStatus
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,8 +14,17 @@ object StationCollector {
 
   val appConfig = new AppConfig
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit ={
+    if(appConfig.environment == AppConfig.Environnement.LOCAL) {
+      println("Writting in embedded kafka")
+      startCollectorEmbedded(appConfig)
+    } else {
+      println("Writting in real kafka")
+      startCollector(appConfig)
+    }
+  }
 
+  def startCollector(appConfig: AppConfig) = {
     val AkkaService: JCDecauxService = new JCDecauxService(appConfig)
     val tickActor = AkkaService.system.actorOf(Props[TickActor], name = "tick-actor")
     val producer: StationProducer = new StationProducer(appConfig)
@@ -22,11 +32,23 @@ object StationCollector {
     AkkaService.system.scheduler.schedule(5.seconds, 1.minute) {
       tickActor ! FetchStationsStatus(AkkaService, producer)
     }
-
   }
 
-  def startCollector(config: AppConfig) = {
+  def startCollectorEmbedded(appConfig: AppConfig) = {
+    val AkkaService: JCDecauxService = new JCDecauxService(appConfig)
+    val tickActor = AkkaService.system.actorOf(Props[TickActor], name = "tick-actor")
 
+    val embeddedKafka = new EmbeddedKafkaHelper {
+      override val topics: Seq[String] = "Station" :: "Station.logs" :: Nil
+    }
+
+    embeddedKafka.startEmbeddedKafka()
+
+    val producer = new StationProducerEmbedded(appConfig)
+
+    AkkaService.system.scheduler.schedule(5.seconds, 1.minute) {
+      tickActor ! FetchStationsStatus(AkkaService, producer)
+    }
   }
 
 }
@@ -65,6 +87,6 @@ object TickActor {
 
   sealed trait Message
 
-  case class FetchStationsStatus(service: JCDecauxService, producer: StationProducer) extends Message
+  case class FetchStationsStatus[T <: StationProducerTrait](service: JCDecauxService, producer: T ) extends Message
 
 }
