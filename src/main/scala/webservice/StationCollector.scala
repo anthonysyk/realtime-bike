@@ -29,7 +29,7 @@ object StationCollector {
     val tickActor = AkkaService.system.actorOf(Props[TickActor], name = "tick-actor")
     val producer: StationProducer = new StationProducer(appConfig)
 
-    AkkaService.system.scheduler.schedule(5.seconds, 1.minute) {
+    AkkaService.system.scheduler.schedule(5.seconds, 10.seconds) {
       tickActor ! FetchStationsStatus(AkkaService, producer)
     }
   }
