@@ -17,11 +17,13 @@
     "@nuxtjs/proxy": "^1.2.4",
     "nuxt": "^1.0.0",
     "vue-native-websocket": "^2.0.8",
+    "vuelayers": "^0.10.12",
     "vuetify": "^1.0.19"
   },
   "devDependencies": {
-    "cross-env": "^5.0.1",
     "babel-eslint": "^8.2.1",
+    "cross-env": "^5.0.1",
+    "css-loader": "^1.0.0",
     "eslint": "^5.0.1",
     "eslint-loader": "^2.0.0",
     "eslint-plugin-vue": "^4.0.0",

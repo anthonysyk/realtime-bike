@@ -2,7 +2,7 @@
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
       <v-card>
-        <v-card-title class="headline">Bienvenue sur Paris Velib - by Versatile Flow</v-card-title>
+        <v-card-title class="headline">Bienvenue sur Real-Time Velib - by Versatile Flow</v-card-title>
         <v-card-text>
           <p>Cette application permet de visualiser en temps réel le traffic sur les bornes vélibs de Paris</p>
           <p>Les technologies utilisées pour le temps réel sont : Kafka, Kafka Stream, Interactive Queries</p>

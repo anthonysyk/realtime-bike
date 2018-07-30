@@ -11,6 +11,10 @@ class AppConfig {
   final val station_logs_topic = "StationLogs"
   final val environment = Environnement.PRODUCTION
 
+  // STIF
+
+  final val stif_api_key = "4fd1fe1a1781fce636e5e8d7a50b3e4bf1358ef3ede4bcf886709d12"
+
 }
 
 

@@ -30,8 +30,7 @@ module.exports = {
   ** Global CSS
   */
   css: [
-    'vuetify/src/stylus/main.styl',
-    '@/assets/css/utility.scss'
+    'vuetify/src/stylus/main.styl'
   ],
 
   /*
@@ -39,8 +38,8 @@ module.exports = {
   */
   plugins: [
     '@/plugins/vuetify',
-    {src: '@/plugins/vue-native-websocket.js', ssr: false}
-
+    {src: '@/plugins/vue-native-websocket.js', ssr: false},
+    '@/plugins/vuelayers.js'
   ],
 
   /*
