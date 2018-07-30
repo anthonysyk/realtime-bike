@@ -1,7 +1,7 @@
 <template>
   <div>
     <vl-map :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            data-projection="EPSG:4326" style="height: 400px">
+            data-projection="EPSG:4326" style="height: 70vh">
       <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
       <vl-geoloc @update:position="value.geolocPosition = $event">
         <template slot-scope="geoloc">
@@ -18,12 +18,12 @@
         <vl-source-osm/>
       </vl-layer-tile>
     </vl-map>
-    <div style="padding: 20px">
-      Zoom: {{ value.zoom }}<br>
-      Center: {{ value.center }}<br>
-      Rotation: {{ value.rotation }}<br>
-      My geolocation: {{ value.geolocPosition }}
-    </div>
+    <!--<div style="padding: 20px">-->
+      <!--Zoom: {{ value.zoom }}<br>-->
+      <!--Center: {{ value.center }}<br>-->
+      <!--Rotation: {{ value.rotation }}<br>-->
+      <!--My geolocation: {{ value.geolocPosition }}-->
+    <!--</div>-->
   </div>
 </template>
 
