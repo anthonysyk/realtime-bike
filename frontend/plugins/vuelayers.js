@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import VueLayers from 'vuelayers'
-import 'vuelayers/lib/style.css' // needs css-loader
+import Vue from "vue"
+import VueLayers from "vuelayers"
+import "vuelayers/lib/style.css" // needs css-loader
 
-export default ({store}, inject) => {
+export default () => {
   Vue.use(VueLayers)
 }

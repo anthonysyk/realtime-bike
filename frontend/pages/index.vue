@@ -4,7 +4,7 @@
       <v-card>
         <v-card-title class="headline">Bienvenue sur Real-Time Velib - by Versatile Flow</v-card-title>
         <v-card-text>
-          <p>Cette application permet de visualiser en temps réel le traffic sur les bornes vélibs de Paris</p>
+          <p>Cette application permet de visualiser en temps réel le traffic sur les bornes vélibs de France</p>
           <p>Les technologies utilisées pour le temps réel sont : Kafka, Kafka Stream, Interactive Queries</p>
           <p>Si vous souhaitez mon expertise sur ces sujets voici mon site <a href="http://www.versatile-flow.com" target="_blank">Versatile Flow</a>.</p>
           <p>Je suis disponible en tant que développeur indépendant</p>
@@ -19,7 +19,7 @@
           <a href="https://github.com/assiyankai" target="_blank">GitHub</a>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer/>
           <v-btn color="primary" flat nuxt to="/carte">Continue</v-btn>
         </v-card-actions>
       </v-card>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import Logo from "~/components/Logo.vue"
 
 export default {
   components: {
