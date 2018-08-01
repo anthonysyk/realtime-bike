@@ -24,7 +24,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
-    <v-toolbar :clipped-left="clipped" fixed app>
+    <v-toolbar :clipped-left="clipped" fixed app light>
       <v-toolbar-side-icon @click="drawer = !drawer"/>
       <img src="/versatile-flow.png" alt="Versatile Flow" class="ml-2 logo">
       <v-toolbar-title class="ml-2" v-text="title"/>
