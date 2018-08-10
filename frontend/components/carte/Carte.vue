@@ -1,9 +1,10 @@
 <template>
-  <div>
+  <div class="map">
     <vl-map :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            data-projection="EPSG:4326" style="height: 70vh">
+            data-projection="EPSG:4326"
+            style="height: 70vh" @click="clickCoordinate = $event.coordinate">
       <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
-      <vl-geoloc @update:position="value.geolocPosition = $event">
+      <vl-geoloc>
         <template slot-scope="geoloc">
           <vl-feature v-if="geoloc.position" id="position-feature">
             <vl-geom-point :coordinates="geoloc.position"/>
@@ -19,13 +20,13 @@
       </vl-layer-tile>
 
       <!--cercle-->
-      <div v-for="station in value.stations" :key="station.id">
+      <div v-for="station in stations" :key="station.id">
         <vl-layer-vector>
           <vl-source-vector>
             <vl-feature>
-              <vl-geom-circle :coordinates="station.coordinates" :radius="100"/>
+              <vl-geom-circle :coordinates="station.position" :radius="100"/>
               <vl-style-box>
-                <vl-style-stroke color="blue"/>
+                <vl-style-stroke color="#3399cc"/>
                 <vl-style-fill color="rgba(255,255,255,0.5)"/>
                 <!--<vl-style-text text="I'm circle"/>-->
               </vl-style-box>
@@ -36,12 +37,14 @@
       <!--circle-->
 
       <!-- selected feature popup -->
-      <div v-for="station in value.stations" :key="station.id">
-        <vl-overlay id="overlay" :position="station.coordinates" class="overlay-content">
+      <div v-for="station in stations" v-if="isStationClicked(station)" :key="`overlay-${station.id}`">
+        <vl-overlay id="overlay" :position="station.position" class="overlay-content">
           <template slot-scope="scope">
             <div class="overlay-content">
               Hello world!<br>
               Position: {{ scope.position }}
+              Click: {{ clickCoordinate }}
+              isStationClick: {{ isStationClicked(station) }}
             </div>
           </template>
         </vl-overlay>
@@ -53,29 +56,55 @@
       Center: {{ value.center }}<br>
       Rotation: {{ value.rotation }}<br>
       My geolocation: {{ value.geolocPosition }}
+
+      Exemple: {{ stations[0] && stations[0].position }}
     </div>
   </div>
 </template>
 
 <script>
-// import { random } from "lodash"
-
 export default {
   props: {
     value: {
       type: Object,
       required: true,
       default: () => {}
+    },
+    stations: {
+      type: Array,
+      required: true,
+      default: () => []
     }
   },
-  data: () => ({
-    zoom: 2,
-    center: [0, 0],
-    rotation: 0,
-    overlayCoordinate: [30, 30]
-  }),
+  data() {
+    return {
+      zoom: 2,
+      center: [0, 0],
+      rotation: 0,
+      overlayCoordinate: [30, 30],
+      clickCoordinate: [],
+      selectedStation: {}
+    }
+  },
   methods: {
-    pointOnSurface: this.findPointOnSurface
+    isStationClicked(station) {
+      const xClick = this.clickCoordinate[0]
+      const yClick = this.clickCoordinate[1]
+
+      const xStation = station.position[0]
+      const yStation = station.position[1]
+
+      function isInside(zClick, zStation) {
+        return Math.abs(zClick - zStation) < 0.0008
+      }
+
+      return (
+        xClick &&
+        yClick &&
+        isInside(xClick, xStation) &&
+        isInside(yClick, yStation)
+      )
+    }
   }
 }
 </script>
@@ -88,15 +117,18 @@ export default {
   margin: 1.2em 0;
   overflow: auto;
   padding: 0 1.4rem;
-  position: relative;
   word-wrap: normal;
-  ackground-color: #f8f8f8;
+  background-color: #f8f8f8;
   font-family: Roboto Mono, Monaco, courier, monospace;
 }
 
 .cover-main .logo {
   width: 100px;
   height: 100px;
+}
+
+.map {
+  cursor: pointer;
 }
 
 .markdown-section {

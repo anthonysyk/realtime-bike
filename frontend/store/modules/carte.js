@@ -1,23 +1,30 @@
 // initial state
 const state = () => ({
-  stations: new Map()
+  stations: []
 })
 
 // getters
 const getters = {
-  getStations: state => state.stations
+  getStations: state => state.stations,
+  getStationsByContract: state => contract =>
+    state.stations.filter(station => station.contract_name === contract)
 }
 
 // actions
 const actions = {
   async fetchStations({ commit }) {
-    const response = await this.$axios.$get("/api/station/access/ALL")
-    // const stations = response.map(stationArray => stationArray[1])
-    const stations = response.reduce(
-      (map, obj) => ((map[obj[0]] = obj[1]), map),
+    const stations = await this.$axios.$get("/api/station/access/ALL")
+    const parsedStations = stations.map(
+      station =>
+        Object.assign({
+          ...station,
+          position: [station.position.lng, station.position.lat]
+        }),
       {}
     )
-    commit("updateStations", stations)
+    console.log(stations[0])
+    console.log(parsedStations[0])
+    commit("updateStations", parsedStations)
   }
 }
 
@@ -25,11 +32,6 @@ const actions = {
 const mutations = {
   updateStations(state, stations) {
     state.stations = stations
-  },
-  updateStation(state, station) {
-    const externalId = [station.number, station.contract_name].join("_")
-    console.log(state.stations)
-    state.stations.set(externalId, station)
   }
 }
 

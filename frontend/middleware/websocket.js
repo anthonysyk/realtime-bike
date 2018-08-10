@@ -7,6 +7,7 @@ export default function({ store }) {
 
   socket.addEventListener("message", function(event) {
     console.log("Message from server ", event.data)
+    console.log(store)
     store.commit("carte/updateStation", event.data)
   })
 }

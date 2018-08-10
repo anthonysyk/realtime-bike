@@ -2,7 +2,6 @@
   <v-layout wrap>
     <v-flex text-xs-center>
       <v-flex xs12 sm6 d-flex>
-        <!--<button @click="clickButton">Click !</button>-->
         <v-select v-model="selected"
                   :items="items"
                   label="Choisissez une ville"
@@ -10,7 +9,7 @@
       </v-flex>
       <v-flex>
         <v-card>
-          <carte v-model="selected.carte"/>
+          <carte-component v-model="selected.carte" :stations="getStationsByContract(selected.carte.city)"/>
         </v-card>
       </v-flex>
     </v-flex>
@@ -18,18 +17,19 @@
 </template>
 
 <script>
-import Carte from "~/components/carte/Carte.vue"
+import CarteComponent from "~/components/carte/Carte.vue"
 import { createNamespacedHelpers } from "vuex"
 
 const { mapGetters } = createNamespacedHelpers("carte")
 
 export default {
   components: {
-    Carte
+    CarteComponent
   },
   data: () => ({
     selected: {
       carte: {
+        city: null,
         zoom: 5,
         center: [2.552748209185793, 46.90598730737233],
         rotation: 0,
@@ -42,15 +42,12 @@ export default {
         text: "Lyon",
         value: {
           carte: {
-            zoom: 12,
-            center: [4.839146847753511, 45.75762703924812],
+            city: "Lyon",
+            zoom: 14,
+            center: [4.845058547900202, 45.74479404710428],
             rotation: 0,
             geolocPosition: undefined,
-            stations: [
-              {
-                coordinates: [4.85682642612025, 45.68983554534154]
-              }
-            ]
+            stations: []
           }
         }
       },
@@ -58,8 +55,9 @@ export default {
         text: "Marseille",
         value: {
           carte: {
-            zoom: 13,
-            center: [5.377084514569716, 43.28811010524572],
+            city: "Marseille",
+            zoom: 14,
+            center: [5.380769198966677, 43.29004776051272],
             rotation: 0,
             geolocPosition: undefined,
             stations: []
@@ -72,13 +70,7 @@ export default {
     store.dispatch("carte/fetchStations")
   },
   computed: {
-    ...mapGetters(["getStations"])
-  },
-  methods: {
-    clickButton() {
-      console.log(this.selected.value)
-    }
-  },
-  middleware: "websocket"
+    ...mapGetters(["getStationsByContract", "getStations"])
+  }
 }
 </script>

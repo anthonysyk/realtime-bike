@@ -1,7 +1,7 @@
 <template>
   <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-      <v-card>
+    <v-flex xs12 sm8 md6 class="mt-5">
+      <v-card class="pa-5">
         <v-card-title class="headline">Bienvenue sur Real-Time Velib - by Versatile Flow</v-card-title>
         <v-card-text>
           <p>Cette application permet de visualiser en temps réel le traffic sur les bornes vélibs de France</p>

@@ -52,11 +52,11 @@ class MyHTTPService(
         (get & pathPrefix("access") & path(Segment)) {
           case "ALL" =>
             complete {
-              fetcher.fetchAllAccessCountSummary.map(_.asJson)
+              fetcher.fetchAllAccessCountSummary
             }
           case hostKey@_ =>
             complete {
-              fetcher.fetchWindowStationsStateByKey(hostKey).map(_.asJson)
+              fetcher.fetchWindowStationsStateByKey(hostKey)
             }
         }
       }
