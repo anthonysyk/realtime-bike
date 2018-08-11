@@ -30,6 +30,8 @@ lazy val collector = project
     libraryDependencies ++= commonDependencies,
     scalaVersion := "2.11.8",
     dockerfile in docker := {
+      // Sets the latest tag
+      ImageName(s"${organization.value}/${name.value}:latest")
       val appDir = "/collector/src/main"
       val targetDir = "/collector"
       new Dockerfile {
@@ -50,6 +52,8 @@ lazy val processor = project
     libraryDependencies ++= commonDependencies,
     scalaVersion := "2.11.8",
     dockerfile in docker := {
+      // Sets the latest tag
+      ImageName(s"${organization.value}/${name.value}:latest")
       val appDir = "/processor/src/main"
       val targetDir = "/processor"
       new Dockerfile {
