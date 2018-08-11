@@ -14,8 +14,8 @@ object StationCollector {
 
   val appConfig = new AppConfig
 
-  def main(args: Array[String]): Unit ={
-    if(appConfig.environment == AppConfig.Environnement.LOCAL) {
+  def main(args: Array[String]): Unit = {
+    if (appConfig.environment == AppConfig.Environnement.LOCAL) {
       println("Writting in embedded kafka")
       startCollectorEmbedded(appConfig)
     } else {
@@ -73,10 +73,9 @@ class TickActor extends Actor {
 
       println(s"[${DateHelper.nowReadable}] ${differentStations.length} stations différentes")
 
-      if (currentState.isEmpty) StationReferential.updateReferentials(stations)
-
       // Producer write into topic
       producer.sendStationsStatus(differentStations)
+
       for {
         s <- differentStations
       } yield {
@@ -90,6 +89,6 @@ object TickActor {
 
   sealed trait Message
 
-  case class FetchStationsStatus[T <: StationProducerTrait](service: JCDecauxService, producer: T ) extends Message
+  case class FetchStationsStatus[T <: StationProducerTrait](service: JCDecauxService, producer: T) extends Message
 
 }

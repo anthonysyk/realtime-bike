@@ -58,25 +58,3 @@ class StateConsumer(val brokers: String,
 
   }
 }
-
-object ScalaConsumerExample extends App {
-
-  implicit val system = ActorSystem("reactive-kafka-records")
-  implicit val materializer = ActorMaterializer()
-
-  //  val example = new StateConsumer("localhost:9092", "1", "Station")
-  //
-  //  example.feedQueue()
-
-  val (ref: ActorRef, publisher: Publisher[String]) = Source.actorRef[String](bufferSize = 5000, OverflowStrategy.fail)
-    .toMat(Sink.asPublisher(true))(Keep.both).run()
-
-  val example = new StateConsumer("localhost:9092", "1", "Station", ref, publisher)
-
-  example.run()
-
-  val source = Source.fromPublisher(publisher)
-
-  source.runForeach(println)
-
-}

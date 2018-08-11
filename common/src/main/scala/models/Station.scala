@@ -94,7 +94,7 @@ object StationReferential {
       )
     }.asJson.noSpaces
 
-    Writer.write(s"${PathHelper.ProjectReference}/stations-ids.json", ids)
+    Writer.write(s"${PathHelper.CollectorReference}/stations-ids.json", ids)
     println("Référentiel mis à jour")
 
   }

@@ -35,19 +35,3 @@ class JCDecauxService(config: AppConfig) extends WebClient {
 
 
 }
-
-object TestService {
-
-  import concurrent.ExecutionContext.Implicits.global
-
-  def main(args: Array[String]): Unit = {
-    val service = new JCDecauxService(new AppConfig)
-
-    service.getStationInformation(9087, "Marseille").andThen { case response =>
-      println(response)
-      service.http.shutdownAllConnectionPools()
-      service.system.terminate()
-    }
-  }
-
-}

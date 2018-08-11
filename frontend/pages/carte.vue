@@ -43,8 +43,8 @@ export default {
         value: {
           carte: {
             city: "Lyon",
-            zoom: 14,
-            center: [4.845058547900202, 45.74479404710428],
+            zoom: 15,
+            center: [4.842469526028807, 45.755144634660354],
             rotation: 0,
             geolocPosition: undefined,
             stations: []
@@ -56,8 +56,8 @@ export default {
         value: {
           carte: {
             city: "Marseille",
-            zoom: 14,
-            center: [5.380769198966677, 43.29004776051272],
+            zoom: 15,
+            center: [5.3809710350488436, 43.29184455955078],
             rotation: 0,
             geolocPosition: undefined,
             stations: []

@@ -15,18 +15,18 @@
         </template>
       </vl-geoloc>
 
-      <vl-layer-tile id="osm">
-        <vl-source-osm/>
+      <vl-layer-tile id="sputnik">
+        <vl-source-sputnik/>
       </vl-layer-tile>
 
       <!--cercle-->
-      <div v-for="station in stations" :key="station.id">
-        <vl-layer-vector>
+      <div>
+        <vl-layer-vector v-for="station in stations" :key="station.id" @mounted="isLoaded">
           <vl-source-vector>
             <vl-feature>
               <vl-geom-circle :coordinates="station.position" :radius="100"/>
               <vl-style-box>
-                <vl-style-stroke color="#3399cc"/>
+                <vl-style-stroke :color="getStationColor(station.status)"/>
                 <vl-style-fill color="rgba(255,255,255,0.5)"/>
                 <!--<vl-style-text text="I'm circle"/>-->
               </vl-style-box>
@@ -41,10 +41,13 @@
         <vl-overlay id="overlay" :position="station.position" class="overlay-content">
           <template slot-scope="scope">
             <div class="overlay-content">
-              Hello world!<br>
-              Position: {{ scope.position }}
-              Click: {{ clickCoordinate }}
-              isStationClick: {{ isStationClicked(station) }}
+              <h1>{{ station.name }}</h1><br>
+              <ul>
+                <li>Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</li>
+                <li>Adresse: {{ station.address }}</li>
+                <li><v-icon>directions_bike</v-icon> Vélos Disponibles: {{ station.available_bikes }}</li>
+                <li><v-icon>local_parking</v-icon>Nombres de stands: {{ station.bike_stands }}</li>
+              </ul>
             </div>
           </template>
         </vl-overlay>
@@ -104,6 +107,13 @@ export default {
         isInside(xClick, xStation) &&
         isInside(yClick, yStation)
       )
+    },
+    isLoaded() {
+      console.log(this.stations)
+      console.log("STATIONS ARE LOADED ! YAAAY")
+    },
+    getStationColor(status) {
+      return status === "CLOSED" ? "red" : "#3399cc"
     }
   }
 }

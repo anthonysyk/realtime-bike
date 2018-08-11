@@ -1,7 +1,7 @@
-import models.Station
-import org.scalatest.FunSuite
 import io.circe.parser._
 import io.circe.syntax._
+import models.Station
+import org.scalatest.FunSuite
 import versatile.utils.CirceHelper._
 
 

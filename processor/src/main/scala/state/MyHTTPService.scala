@@ -37,7 +37,10 @@ class MyHTTPService(
   val sourceWS = source.map(record => TextMessage(record))
 
   val allStationStateFlow: Flow[Message, TextMessage, NotUsed] = {
-    val sink = Flow[Message].map{case TextMessage.Strict(message) => println(message)}.to(Sink.ignore)
+    val sink = Flow[Message].map {
+      case TextMessage.Strict(message) => println(message)
+      case _ => ()
+    }.to(Sink.ignore)
     Flow.fromSinkAndSource(sink, sourceWS)
   }
 

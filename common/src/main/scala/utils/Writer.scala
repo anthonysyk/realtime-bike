@@ -17,8 +17,12 @@ object PathHelper {
 
   private def getCanonical(pathname: String) = new java.io.File(pathname).getCanonicalPath
 
-  lazy val ProjectReference = getCanonical("./src/main/resources")
+  lazy val CollectorReference = getCanonical("./src/main/resources")
 
   lazy val StateStoreDirectory = getCanonical("./local_state_data")
+
+  def main(args: Array[String]): Unit = {
+    println(getCanonical("."))
+  }
 
 }
