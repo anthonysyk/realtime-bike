@@ -6,7 +6,7 @@ remoteDir=/home/anthony/projects/paris-velib/processor
 remoteHost="anthony@192.168.1.26"
 portNumber=222
 
-rsync -avrc --delete \
+rsync -avrc \
     --exclude tmp \
     --exclude-from ./deploy.sh \
     -e "ssh -p $portNumber" \

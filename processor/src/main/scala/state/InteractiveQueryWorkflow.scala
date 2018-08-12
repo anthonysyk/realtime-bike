@@ -10,7 +10,7 @@ import org.apache.kafka.streams.state.HostInfo
 
 trait InteractiveQueryWorkflow extends LazyLogging {
 
-  val config = new AppConfig
+  val config = AppConfig.conf
 
   def startRestProxy(streams: KafkaStreams, hostInfo: HostInfo,
                      actorSystem: ActorSystem, materializer: ActorMaterializer): InteractiveQueryHttpService
@@ -20,11 +20,11 @@ trait InteractiveQueryWorkflow extends LazyLogging {
   def workflow() = {
 
     // setup REST endpoints
-    val restEndpointPort = 9000
+    val restEndpointPort = config.webservice.port
     val restEndpointHostName = "localhost"
     val restEndpoint = new HostInfo(restEndpointHostName, restEndpointPort)
 
-    logger.info("Connecting to Kafka cluster via bootstrap servers " + config.brokers)
+    logger.info("Connecting to Kafka cluster via bootstrap servers " + config.kafka.bootstrap_server)
     logger.warn("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
     println("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
 

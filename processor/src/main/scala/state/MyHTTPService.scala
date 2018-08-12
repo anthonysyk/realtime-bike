@@ -8,7 +8,6 @@ import akka.http.scaladsl.server.Directives
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 import com.lightbend.kafka.scala.iq.http.InteractiveQueryHttpService
-import io.circe.syntax._
 import org.apache.kafka.streams.state.HostInfo
 import org.reactivestreams.Publisher
 
