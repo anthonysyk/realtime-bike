@@ -2,7 +2,7 @@ package webservice
 
 import akka.actor.{Actor, Props}
 import config.AppConfig
-import models.{Station, StationReferential}
+import models.Station
 import utils.date.DateHelper
 import versatile.kafka.EmbeddedKafkaHelper
 import webservice.TickActor.FetchStationsStatus

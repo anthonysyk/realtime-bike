@@ -1,12 +1,8 @@
-import sbtdocker.DockerPlugin.autoImport.dockerfile
-
 name := "paris-velib"
 
 version := "0.1"
 
 scalaVersion := "2.11.8"
-
-buildOptions in docker := BuildOptions(cache = false)
 
 lazy val global = project
   .in(file("."))
@@ -24,82 +20,40 @@ lazy val common = project
   )
 
 lazy val collector = project
-  .enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
+  .enablePlugins(PackPlugin)
   .settings(
     name := "collector",
     libraryDependencies ++= commonDependencies,
     scalaVersion := "2.11.8",
-    dockerfile in docker := {
-      // Sets the latest tag
-      ImageName(s"${organization.value}/${name.value}:latest")
-      val appDir = "/collector/src/main"
-      val targetDir = "/collector"
-      new Dockerfile {
-        from("hseeberger/scala-sbt")
-        entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-        copyRaw(appDir, targetDir)
-      }
-    }
+    packGenerateWindowsBatFile := false,
+    packMain := Map("run-collector" -> "webservice.StationCollector"),
+    packResourceDir := Map(
+      baseDirectory.value / "Dockerfile" ->  "Dockerfile",
+      baseDirectory.value / "src/main/bin" -> "bin"
+    )
   )
   .dependsOn(
     common
   )
 
 lazy val processor = project
-  .enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
+  .enablePlugins(PackPlugin)
   .settings(
     name := "processor",
     libraryDependencies ++= commonDependencies,
     scalaVersion := "2.11.8",
-    dockerfile in docker := {
-      // Sets the latest tag
-      ImageName(s"${organization.value}/${name.value}:latest")
-      val appDir = "/processor/src/main"
-      val targetDir = "/processor"
-      new Dockerfile {
-        from("hseeberger/scala-sbt")
-        expose(9000)
-        entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-        copyRaw(appDir, targetDir)
-      }
-    }
+    packGenerateWindowsBatFile := false,
+    packMain := Map("run-processor" -> "state.StationStateProcessor"),
+    packResourceDir := Map(
+      baseDirectory.value / "Dockerfile" ->  "Dockerfile",
+      baseDirectory.value / "src/main/bin" -> "bin"
+    )
   )
   .dependsOn(
     common
   )
 
-lazy val dependencies = {
-  new {
-    val kafkaV = "1.0.1"
-    val kafka_streams_scala_version = "0.2.1"
-    val kafka_streams_query_version = "0.1.1"
-    val circeVersion = "0.9.1"
-
-    val scala_test = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
-
-
-    val kafka_all = Seq(
-      "org.apache.kafka" % "kafka_2.11" % kafkaV,
-      "org.apache.kafka" % "kafka-streams" % kafkaV,
-      "com.lightbend" %% "kafka-streams-scala" % kafka_streams_scala_version,
-      "com.lightbend" %% "kafka-streams-query" % kafka_streams_query_version,
-      "net.manub" %% "scalatest-embedded-kafka" % "1.0.0"
-    )
-
-    val akka_all = Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.0",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.11"
-    )
-
-    val circe = Seq(
-      "io.circe" %% "circe-core",
-      "io.circe" %% "circe-generic",
-      "io.circe" %% "circe-parser"
-    ).map(_ % circeVersion)
-
-    val versatile = "org.versatile-flow" %% "versatile-library" % "0.1"
-  }
-}
+import Common.dependencies
 
 lazy val commonDependencies = Seq(
   dependencies.versatile,

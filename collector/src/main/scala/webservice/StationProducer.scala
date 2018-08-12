@@ -13,6 +13,7 @@ sealed trait StationProducerTrait {
 class StationProducer(config: AppConfig) extends KafkaProducerHelper[String, String] with StationProducerTrait {
   override val topic: String = config.station_topic
   override val logsTopic: String = config.station_logs_topic
+  override val bootstrapServer = config.bootstrap_server
 
   private def createStationRecord(station: Station) = new ProducerRecord[String, String](topic, station.externalId, station.asJson.noSpaces)
 
