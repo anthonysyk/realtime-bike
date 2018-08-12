@@ -8,4 +8,4 @@ cd "$remoteDir" && docker build -t paris-velib/collector:latest .
 
 docker container rm -f paris-velib-collector
 
-docker run -d --restart always --name=paris-velib-collector paris-velib/collector
+docker run -d --restart always --network=host --name=paris-velib-collector paris-velib/collector

@@ -12,16 +12,11 @@ import scala.concurrent.duration._
 
 object StationCollector {
 
-  val appConfig = new AppConfig
+  val appConfig = AppConfig.conf
 
   def main(args: Array[String]): Unit = {
-    if (appConfig.environment == AppConfig.Environnement.LOCAL) {
-      println("Writting in embedded kafka")
-      startCollectorEmbedded(appConfig)
-    } else {
-      println("Writting in real kafka")
-      startCollector(appConfig)
-    }
+    println("Writting in real kafka")
+    startCollector(appConfig)
   }
 
   def startCollector(appConfig: AppConfig) = {

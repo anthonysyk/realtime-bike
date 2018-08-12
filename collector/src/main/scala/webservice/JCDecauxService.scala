@@ -7,12 +7,12 @@ import scala.concurrent.Future
 
 class JCDecauxService(config: AppConfig) extends WebClient {
 
-  val stationsUrl = s"${config.api_url}/stations"
+  val stationsUrl = s"${config.api.api_url}/stations"
 
-  val contractsUrl = s"${config.api_url}/contracts"
+  val contractsUrl = s"${config.api.api_url}/contracts"
 
   val apiKeyMap = Map(
-    "apiKey" -> config.api_key
+    "apiKey" -> config.api.api_key
   )
 
   def getContactsList: Future[Either[String, String]] = doGet(contractsUrl)
