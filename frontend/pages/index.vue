@@ -2,9 +2,9 @@
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6 class="mt-5">
       <v-card class="pa-5">
-        <v-card-title class="headline">Bienvenue sur Real-Time Velib - by Versatile Flow</v-card-title>
+        <v-card-title class="headline">Bienvenue sur Real-Time Bike - by Versatile Flow</v-card-title>
         <v-card-text>
-          <p>Cette application permet de visualiser en temps réel le traffic sur les bornes vélibs de France</p>
+          <p>Cette application permet de visualiser en temps réel le traffic sur les stations de vélos de France</p>
           <p>Les technologies utilisées pour le temps réel sont : Kafka, Kafka Stream, Interactive Queries</p>
           <div class="text-xs-right">
             <em>

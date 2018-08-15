@@ -1,8 +1,8 @@
 <template>
   <div class="map">
-    <vl-map :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            data-projection="EPSG:4326"
-            style="height: 70vh" @click="clickCoordinate = $event.coordinate">
+    <vl-map ref="map" :load-tiles-while-animating="true"
+            :load-tiles-while-interacting="true" data-projection="EPSG:4326"
+            style="height: 70vh" @click="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
       <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
       <vl-geoloc>
         <template slot-scope="geoloc">
@@ -19,38 +19,24 @@
         <vl-source-sputnik/>
       </vl-layer-tile>
 
-      <!--cercle-->
-      <div>
-        <vl-layer-vector v-for="station in stations" :key="station.id" @mounted="isLoaded">
-          <vl-source-vector>
-            <vl-feature>
-              <vl-geom-circle :coordinates="station.position" :radius="100"/>
-              <vl-style-box>
-                <vl-style-stroke :color="getStationColor(station.status)"/>
-                <vl-style-fill color="rgba(255,255,255,0.5)"/>
-                <!--<vl-style-text text="I'm circle"/>-->
-              </vl-style-box>
-            </vl-feature>
-          </vl-source-vector>
-        </vl-layer-vector>
-      </div>
-      <!--circle-->
-
       <!-- selected feature popup -->
-      <div v-for="station in stations" v-if="isStationClicked(station)" :key="`overlay-${station.id}`">
-        <vl-overlay id="overlay" :position="station.position" class="overlay-content">
+      <div v-for="station in getStations()" :key="`overlay-${station.id}`">
+        <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position" class="overlay-content">
           <template slot-scope="scope">
-            <div class="overlay-content">
-              <h1>{{ station.name }}</h1><br>
-              <ul>
-                <li>Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</li>
-                <li>Adresse: {{ station.address }}</li>
-                <li><v-icon>directions_bike</v-icon> Vélos Disponibles: {{ station.available_bikes }}</li>
-                <li><v-icon>local_parking</v-icon>Nombres de stands: {{ station.bike_stands }}</li>
-              </ul>
-            </div>
+            <station-info-component :station="station"/>
           </template>
         </vl-overlay>
+
+        <!--CIRCLES-->
+        <vl-feature>
+          <vl-geom-circle :coordinates="station.position" :radius="60"/>
+          <vl-style-box>
+            <vl-style-stroke :color="getStationColor(station.status)"/>
+            <vl-style-fill color="rgba(255,255,255,0.5)"/>
+          </vl-style-box>
+        </vl-feature>`
+        <!--CIRCLES-->
+
       </div>
       <!--// selected popup -->
     </vl-map>
@@ -58,7 +44,9 @@
       Zoom: {{ value.zoom }}<br>
       Center: {{ value.center }}<br>
       Rotation: {{ value.rotation }}<br>
-      My geolocation: {{ value.geolocPosition }}
+      Click: {{ clickCoordinate }}<br>
+      Corners: {{ corners.topRight }}<br>
+      Stations: {{ getStations().length }}<br>
 
       Exemple: {{ stations[0] && stations[0].position }}
     </div>
@@ -66,7 +54,11 @@
 </template>
 
 <script>
+import { transformExtent } from "vuelayers/lib/_esm/ol-ext"
+import StationInfoComponent from "./StationInfoComponent"
+
 export default {
+  components: { StationInfoComponent },
   props: {
     value: {
       type: Object,
@@ -86,10 +78,16 @@ export default {
       rotation: 0,
       overlayCoordinate: [30, 30],
       clickCoordinate: [],
-      selectedStation: {}
+      selectedStation: {},
+      corners: {},
+      currExtent: [],
+      hasMap: false
     }
   },
   methods: {
+    getStations() {
+      return this.stations.filter(station => this.isInsideMap(station))
+    },
     isStationClicked(station) {
       const xClick = this.clickCoordinate[0]
       const yClick = this.clickCoordinate[1]
@@ -98,7 +96,7 @@ export default {
       const yStation = station.position[1]
 
       function isInside(zClick, zStation) {
-        return Math.abs(zClick - zStation) < 0.0008
+        return Math.abs(zClick - zStation) < 0.0004
       }
 
       return (
@@ -109,17 +107,49 @@ export default {
       )
     },
     isLoaded() {
-      console.log(this.stations)
-      console.log("STATIONS ARE LOADED ! YAAAY")
+      // console.log(this.stations)
+      // console.log("STATIONS ARE LOADED ! YAAAY")
     },
     getStationColor(status) {
       return status === "CLOSED" ? "red" : "#3399cc"
+    },
+    onMapPostCompose() {
+      if (this.currExtent === this.$refs.map.$map.frameState_.extent) return
+
+      console.log("update corners")
+
+      const cornerCoordinates = transformExtent(
+        this.$refs.map.$map.frameState_.extent,
+        "EPSG:3857",
+        "EPSG:4326"
+      )
+
+      this.corners = {
+        topLeft: cornerCoordinates[0],
+        bottomLeft: cornerCoordinates[1],
+        bottomRight: cornerCoordinates[2],
+        topRight: cornerCoordinates[3]
+      }
+    },
+    isInsideMap(station) {
+      const xStation = station.position[0]
+      const yStation = station.position[1]
+
+      const { topLeft, bottomRight, bottomLeft, topRight } = this.corners
+
+      const xIsInside = xStation > topLeft && xStation < bottomRight
+      const yIsInside = yStation > bottomLeft && yStation < topRight
+      return xIsInside && yIsInside
+      //
+      // console.log(this.corners)
+      // console.log(topLeft, xStation, topRight)
+      // return result
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .cover-main pre {
   position: relative;
   -webkit-font-smoothing: initial;
@@ -167,12 +197,5 @@ export default {
 
 .vuep-preview {
   padding: 0;
-}
-
-.overlay-content {
-  background: #efefef;
-  box-shadow: 0 5px 10px rgba(2, 2, 2, 0.2);
-  padding: 10px 20px;
-  font-size: 16px;
 }
 </style>

@@ -13,7 +13,7 @@ const getters = {
 // actions
 const actions = {
   async fetchStations({ commit }) {
-    const stations = await this.$axios.$get("/api/station/access/ALL")
+    const stations = await this.$axios.$get("/kafka/station/access/ALL")
     const parsedStations = stations.map(
       station =>
         Object.assign({

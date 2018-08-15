@@ -1,5 +1,5 @@
 export default function({ store }) {
-  const socket = new WebSocket("ws://localhost:9000")
+  const socket = new WebSocket("ws://localhost:9001")
 
   socket.addEventListener("open", function() {
     socket.send("Hello Server!")

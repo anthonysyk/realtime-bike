@@ -2,9 +2,10 @@ const pkg = require("./package")
 
 const nodeExternals = require("webpack-node-externals")
 
+const isDev = process.env.NODE_ENV === "development"
+
 module.exports = {
   mode: "spa",
-
   /*
   ** Headers of the page
   */
@@ -53,10 +54,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    proxy: true
-  },
-  proxy: {
-    "/api/": { target: "http://localhost:9000", pathRewrite: { "^/api/": "" } }
+    baseURL: isDev ? "http://localhost:4000" : "http://192.168.1.26:4000",
+    browserBaseURL: isDev ? "http://localhost:4000" : "http://192.168.1.26:4000"
   },
   /*
   ** Build configuration

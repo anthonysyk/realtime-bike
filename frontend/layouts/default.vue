@@ -70,7 +70,7 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: "Real-Time Velib"
+      title: "Real-Time Bike"
     }
   }
 }
