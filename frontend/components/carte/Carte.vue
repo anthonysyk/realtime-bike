@@ -45,7 +45,6 @@
       Center: {{ value.center }}<br>
       Rotation: {{ value.rotation }}<br>
       Click: {{ clickCoordinate }}<br>
-      Corners: {{ corners.topRight }}<br>
       Stations: {{ getStations().length }}<br>
 
       Exemple: {{ stations[0] && stations[0].position }}
@@ -140,10 +139,6 @@ export default {
       const xIsInside = xStation > topLeft && xStation < bottomRight
       const yIsInside = yStation > bottomLeft && yStation < topRight
       return xIsInside && yIsInside
-      //
-      // console.log(this.corners)
-      // console.log(topLeft, xStation, topRight)
-      // return result
     }
   }
 }

@@ -84,8 +84,8 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
           val availability = StationState.getAvailability(current.available_bikes, current.bike_stands)
           current.copy(
             state = Some(StationState(
-              bikes_taken = accStation.state.map(_.bikes_taken + bikesTaken).getOrElse(0),
-              bikes_droped = accStation.state.map(_.bikes_droped + bikesDropped).getOrElse(0),
+              bikes_taken = bikesTaken,
+              bikes_droped = bikesDropped,
               availability = availability
             ))
           ).asJson.noSpaces

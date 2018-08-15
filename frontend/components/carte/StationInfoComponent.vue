@@ -1,14 +1,14 @@
 <template>
   <v-card class="overlay-content">
     <v-card-title primary-title>
-      <h1>{{ station.name }}</h1><br>
+      <h3 :style="getStationColor(station)" >{{ station.name }}</h3><br>
     </v-card-title>
-    <ul>
-      <li>Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</li>
-      <li>Adresse: {{ station.address }}</li>
-      <li><v-icon>directions_bike</v-icon> Vélos Disponibles: {{ station.available_bikes }}</li>
-      <li><v-icon>local_parking</v-icon>Nombres de stands: {{ station.bike_stands }}</li>
-    </ul>
+    <hr>
+    <div class="grid-container">
+      <div/><div class="grid-item-text">Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>
+      <v-icon>directions_bike</v-icon><div class="grid-item-text"> {{ station.available_bikes }} vélo(s)</div>
+      <v-icon>local_parking</v-icon><div class="grid-item-text"> {{ station.bike_stands }} place(s)</div>
+    </div>
   </v-card>
 </template>
 
@@ -21,18 +21,33 @@ export default {
       required: true,
       default: () => {}
     }
+  },
+  methods: {
+    getStationColor(station) {
+      return station.status === "CLOSED" ? "color: red" : ""
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.grid-container {
+  margin: 2rem 0 2rem 0;
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  grid-column-gap: 50px;
+}
+
+.grid-item-text {
+  text-align: left;
+}
+
 .overlay-content {
   padding: 10px 20px;
   font-size: 16px;
-  h1 {
-    font-size: 30px;
-  }
+  border-radius: 15px;
   ul {
+    text-align: left;
     list-style: none;
   }
 }
