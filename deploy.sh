@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sbt test pack
+sbt pack
 
 collector/deploy.sh
 

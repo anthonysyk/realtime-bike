@@ -5,3 +5,4 @@ local_state_data/
 frontend/node_modules
 frontend/.nuxt
 frontend/dist
+tmp/

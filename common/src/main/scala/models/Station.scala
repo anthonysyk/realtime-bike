@@ -60,9 +60,13 @@ object Station {
 case class Position(lat: Double, lng: Double)
 
 case class StationState(
+                         start_date: String,
+                         last_update: String,
                          bikes_taken: Int,
                          bikes_droped: Int,
-                         availability: Double
+                         availability: Double,
+                         counter: Int,
+                         counterStateChanged: Int
                        )
 
 object StationState {

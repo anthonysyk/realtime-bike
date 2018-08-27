@@ -11,4 +11,7 @@ object DateHelper {
 
   def nowReadable: String = formatReadable.format(new Date)
 
+  def convertToReadable(ts: Long) = {
+    formatReadable.format(ts)
+  }
 }

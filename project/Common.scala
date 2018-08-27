@@ -8,13 +8,19 @@ object Common {
       val kafka_streams_scala_version = "0.2.1"
       val kafka_streams_query_version = "0.1.1"
       val circeVersion = "0.9.1"
+      val CuratorVersion      = "4.0.0"
+      val MinitestVersion     = "2.0.0"
 
-      val scala_test = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+      val curator      = "org.apache.curator"         % "curator-test"    % CuratorVersion
+      val minitest     = "io.monix"                   %% "minitest"       % MinitestVersion % "test"
+      val minitestLaws = "io.monix"                   %% "minitest-laws"  % MinitestVersion % "test"
 
 
       val kafka_all = Seq(
-        "org.apache.kafka" % "kafka_2.11" % kafkaV,
-        "org.apache.kafka" % "kafka-streams" % kafkaV,
+        "org.apache.kafka" % "kafka_2.11" % kafkaV excludeAll (ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("org.apache.zookeeper",
+          "zookeeper")),
+        "org.apache.kafka" % "kafka-streams" % kafkaV excludeAll (ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("org.apache.zookeeper",
+          "zookeeper")),
         "com.lightbend" %% "kafka-streams-scala" % kafka_streams_scala_version,
         "com.lightbend" %% "kafka-streams-query" % kafka_streams_query_version,
         "net.manub" %% "scalatest-embedded-kafka" % "1.0.0"
@@ -23,6 +29,12 @@ object Common {
       val akka_all = Seq(
         "com.typesafe.akka" %% "akka-http" % "10.1.0",
         "com.typesafe.akka" %% "akka-stream" % "2.5.11"
+      )
+
+      val spark_all = Seq(
+        "org.apache.spark" %% "spark-core" % "2.2.0",
+        "org.apache.spark" %% "spark-sql" % "2.2.0",
+        "org.apache.spark" %% "spark-mllib" % "2.2.0" % "runtime"
       )
 
       val circe = Seq(

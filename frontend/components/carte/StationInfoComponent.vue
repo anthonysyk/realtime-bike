@@ -2,6 +2,12 @@
   <v-card class="overlay-content">
     <v-card-title primary-title>
       <h3 :style="getStationColor(station)" >{{ station.name }}</h3><br>
+      <v-chip v-if="isStationClosed(station)" class="ml-3 pl-1" color="red" text-color="white">
+        <v-avatar>
+          <v-icon dark>remove_circle_outline</v-icon>
+        </v-avatar>
+        Fermée
+      </v-chip>
     </v-card-title>
     <hr>
     <div class="grid-container">
@@ -23,6 +29,9 @@ export default {
     }
   },
   methods: {
+    isStationClosed(station) {
+      return station.status === "CLOSED"
+    },
     getStationColor(station) {
       return station.status === "CLOSED" ? "color: red" : ""
     }

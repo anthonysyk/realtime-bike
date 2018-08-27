@@ -24,7 +24,7 @@ object StationCollector {
     val tickActor = AkkaService.system.actorOf(Props[TickActor], name = "tick-actor")
     val producer: StationProducer = new StationProducer(appConfig)
 
-    AkkaService.system.scheduler.schedule(5.seconds, 20.seconds) {
+    AkkaService.system.scheduler.schedule(5.seconds, 60.seconds) {
       tickActor ! FetchStationsStatus(AkkaService, producer)
     }
   }
@@ -61,10 +61,14 @@ class TickActor extends Actor {
       val maybeResponse = response.toOption.flatMap(_.right.toOption)
       val stations: Seq[Station] = maybeResponse.map(Station.fromStationListJson).getOrElse(Nil).flatMap(_.right.toOption)
       println(s"[${DateHelper.nowReadable}] ${stations.length} stations récupérées")
-      val differentStations = stations.filter(station => currentState.get(station.number) match {
-        case Some(stateStation) => stateStation.equals(station)
-        case None => true
-      }).filter(station => contractsFilter.contains(station.contract_name))
+
+//      val differentStations = stations.filter(station => currentState.get(station.number) match {
+//        case Some(stateStation) => stateStation.equals(station)
+//        case None => true
+//      }).filter(station => contractsFilter.contains(station.contract_name))
+
+      val differentStations = stations
+        .filter(station => contractsFilter.contains(station.contract_name))
 
       println(s"[${DateHelper.nowReadable}] ${differentStations.length} stations différentes")
 

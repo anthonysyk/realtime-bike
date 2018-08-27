@@ -14,4 +14,4 @@ $KAFKA_HOME/bin/confluent start
 
 wait
 
-create-topics.sh
+./create-topics.sh

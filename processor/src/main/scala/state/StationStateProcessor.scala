@@ -76,20 +76,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
     groupedStream
       .aggregate(
         () => Station.empty.asJson.noSpaces,
-        (_: String, current: Station, acc: String) => {
-          val accStation = parse(acc).getRight.as[Station].right.toOption.get
-          val deltaBikes = current.available_bikes - accStation.available_bikes
-          val bikesDropped = if (deltaBikes > 0) deltaBikes else 0 + accStation.state.map(_.bikes_droped).getOrElse(0)
-          val bikesTaken = if (deltaBikes < 0) Math.abs(deltaBikes) else 0 + accStation.state.map(_.bikes_taken).getOrElse(0)
-          val availability = StationState.getAvailability(current.available_bikes, current.bike_stands)
-          current.copy(
-            state = Some(StationState(
-              bikes_taken = bikesTaken,
-              bikes_droped = bikesDropped,
-              availability = availability
-            ))
-          ).asJson.noSpaces
-        },
+        StateAggregators.foldStationState,
         Materialized.as(ACCESS_STATION_STATE)
           .withKeySerde(stringSerde)
           .withValueSerde(stringSerde)
