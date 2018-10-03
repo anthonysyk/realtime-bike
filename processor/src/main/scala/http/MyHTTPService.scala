@@ -1,4 +1,4 @@
-package state
+package http
 
 import akka.NotUsed
 import akka.actor.{ActorRef, ActorSystem}
@@ -10,6 +10,7 @@ import akka.stream.{ActorMaterializer, OverflowStrategy}
 import com.lightbend.kafka.scala.iq.http.InteractiveQueryHttpService
 import org.apache.kafka.streams.state.HostInfo
 import org.reactivestreams.Publisher
+import state.{StateConsumer, StationStateFetcher}
 
 import scala.concurrent.ExecutionContext
 
@@ -58,9 +59,33 @@ class MyHTTPService(
             }
           case hostKey@_ =>
             complete {
-              fetcher.fetchWindowStationsStateByKey(hostKey)
+              fetcher.fetchStationsStateByKey(hostKey)
             }
-        }
+        } ~
+          (get & pathPrefix("access" / "win" / Segment / Segment / LongNumber / LongNumber)) { (window, hostKey, fromTime, toTime) =>
+            window match {
+              case "3h" =>
+                complete {
+                  fetcher.fetchWindow3h(hostKey, fromTime, toTime)
+                }
+              case "1h" =>
+                complete {
+                  fetcher.fetchWindow1h(hostKey, fromTime, toTime)
+                }
+              case "5min" =>
+                complete {
+                  fetcher.fetchWindow1min(hostKey, fromTime, toTime)
+                }
+              case "15min" =>
+                complete {
+                  fetcher.fetchWindow5min(hostKey, fromTime, toTime)
+                }
+              case "30min" =>
+                complete {
+                  fetcher.fetchWindow30min(hostKey, fromTime, toTime)
+                }
+            }
+          }
       }
   }
 }

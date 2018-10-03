@@ -5,13 +5,14 @@ import java.util.Date
 
 object DateHelper {
 
-  val formatReadable = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+  val sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+  sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT+2"))
 
   def nowTimestamp: Long = (new Date).getTime
 
-  def nowReadable: String = formatReadable.format(new Date)
+  def nowReadable: String = sdf.format(new Date)
 
   def convertToReadable(ts: Long) = {
-    formatReadable.format(ts)
+    sdf.format(ts)
   }
 }

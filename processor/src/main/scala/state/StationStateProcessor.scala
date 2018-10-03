@@ -9,12 +9,13 @@ import com.lightbend.kafka.scala.iq.http.{HttpRequester, KeyValueFetcher}
 import com.lightbend.kafka.scala.iq.serializers.Serializers
 import com.lightbend.kafka.scala.iq.services.{LocalStateStoreQuery, MetadataService}
 import com.lightbend.kafka.scala.streams.{KStreamS, StreamsBuilderS}
+import http.MyHTTPService
 import io.circe.parser._
 import io.circe.syntax._
-import models.{Serde, Station, StationState}
+import models.{Serde, Station}
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.kstream.{Materialized, Produced, Serialized}
+import org.apache.kafka.streams.kstream.{Materialized, Produced, Serialized, TimeWindows}
 import org.apache.kafka.streams.state.HostInfo
 import org.apache.kafka.streams.{Consumed, KafkaStreams, StreamsConfig}
 import utils.PathHelper
@@ -25,6 +26,12 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
   final val ACCESS_STATION_STATE = "access-station-state"
   final val AVAILABILITY_STATE = "availability-state"
+  final val WINDOW_STATION_STATE_1H = "window-station-state-1H"
+  final val WINDOW_STATION_STATE_1min = "window-station-state-1min"
+  final val WINDOW_STATION_STATE_5min = "window-station-state-5min"
+  final val WINDOW_STATION_STATE_30min = "window-station-state-30min"
+  final val WINDOW_STATION_STATE_3H = "window-station-state-3H"
+
 
   import versatile.utils.CirceHelper._
 
@@ -84,6 +91,24 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
   }
 
+  def createStationStateWindow(stationRecord: KStreamS[String, String], window: Long, materialized: String, topic: String)(implicit builder: StreamsBuilderS) = {
+
+    val groupedStream = stationRecord.flatMapValues(parse(_).getRight.as[Station].right.toOption)
+      .groupByKey(Serialized.`with`(stringSerde, Serde.STATION_SERDE))
+
+    /* WINDOW_STATION_STATE */
+    groupedStream
+      .windowedBy(TimeWindows.of(window))
+      .aggregate(
+        () => Station.empty.asJson.noSpaces,
+        StateAggregators.foldStationState,
+        Materialized.as(materialized)
+          .withKeySerde(stringSerde)
+          .withValueSerde(stringSerde)
+      ).toStream.to(topic)(Produced.`with`(windowedStringSerde, stringSerde))
+
+  }
+
   override def createStreams(): KafkaStreams = {
     // Kafka stream configuration
     val streamingConfig = {
@@ -116,6 +141,14 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
     val stations: KStreamS[String, String] = builder.stream(config.kafka.station_topic)(Consumed.`with`(stringSerde, stringSerde))
 
     createStationStateSummary(stations)
+
+    createStationStateWindow(stations, 60000, WINDOW_STATION_STATE_1min, "Window1min")
+    createStationStateWindow(stations, 60000 * 5, WINDOW_STATION_STATE_5min, "Window1min")
+    createStationStateWindow(stations, 60000 * 30, WINDOW_STATION_STATE_30min, "Window30min")
+    createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_1H, "Window1h")
+    createStationStateWindow(stations, 60000 * 60 * 3, WINDOW_STATION_STATE_1H, "Window3h")
+
+
 
     new KafkaStreams(builder.build(), streamingConfig)
   }
