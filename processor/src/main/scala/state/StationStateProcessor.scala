@@ -9,7 +9,8 @@ import com.lightbend.kafka.scala.iq.http.{HttpRequester, KeyValueFetcher}
 import com.lightbend.kafka.scala.iq.serializers.Serializers
 import com.lightbend.kafka.scala.iq.services.{LocalStateStoreQuery, MetadataService}
 import com.lightbend.kafka.scala.streams.{KStreamS, StreamsBuilderS}
-import http.MyHTTPService
+import enums.WindowInterval
+import http.{InteractiveQueryWorkflow, MyHTTPService}
 import io.circe.parser._
 import io.circe.syntax._
 import models.{Serde, Station}
@@ -26,12 +27,6 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
   final val ACCESS_STATION_STATE = "access-station-state"
   final val AVAILABILITY_STATE = "availability-state"
-  final val WINDOW_STATION_STATE_1H = "window-station-state-1H"
-  final val WINDOW_STATION_STATE_1min = "window-station-state-1min"
-  final val WINDOW_STATION_STATE_5min = "window-station-state-5min"
-  final val WINDOW_STATION_STATE_30min = "window-station-state-30min"
-  final val WINDOW_STATION_STATE_3H = "window-station-state-3H"
-
 
   import versatile.utils.CirceHelper._
 
@@ -63,12 +58,14 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
 
     implicit val ss = stringSerializer
 
+    val fetcher = new StateFetcher(
+      new KeyValueFetcher[String, String](metadataService, localStateStoreQuery, httpRequester, streams, executionContext, hostInfo)
+    )
+
     val restService = new MyHTTPService(
       hostInfo,
-      new StationStateFetcher(
-        new KeyValueFetcher[String, String](metadataService, localStateStoreQuery, httpRequester, streams, executionContext, hostInfo)
-      ),
-      system, materializer, executionContext
+      system, materializer, executionContext,
+      fetcher
     )
     restService.start()
     restService
@@ -124,7 +121,7 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
       streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
       streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String.getClass.getName)
 
-      streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, s"localhost:${config.webservice.port}")
+      streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, config.webservice.hostport)
 
       // default is /tmp/kafka-streams
       streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, PathHelper.StateStoreDirectory)
@@ -136,19 +133,17 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
       streamsConfiguration
     }
 
-    implicit val builder = new StreamsBuilderS
+    implicit val builder: StreamsBuilderS = new StreamsBuilderS
 
     val stations: KStreamS[String, String] = builder.stream(config.kafka.station_topic)(Consumed.`with`(stringSerde, stringSerde))
 
+    import WindowInterval._
     createStationStateSummary(stations)
-
-    createStationStateWindow(stations, 60000, WINDOW_STATION_STATE_1min, "Window1min")
-    createStationStateWindow(stations, 60000 * 5, WINDOW_STATION_STATE_5min, "Window1min")
+    createStationStateWindow(stations, 60000 * 5, WINDOW_STATION_STATE_5min, "Window5min")
+    createStationStateWindow(stations, 60000 * 15, WINDOW_STATION_STATE_15min, "Window15min")
     createStationStateWindow(stations, 60000 * 30, WINDOW_STATION_STATE_30min, "Window30min")
     createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_1H, "Window1h")
-    createStationStateWindow(stations, 60000 * 60 * 3, WINDOW_STATION_STATE_1H, "Window3h")
-
-
+    createStationStateWindow(stations, 60000 * 60 * 3, WINDOW_STATION_STATE_3H, "Window3h")
 
     new KafkaStreams(builder.build(), streamingConfig)
   }

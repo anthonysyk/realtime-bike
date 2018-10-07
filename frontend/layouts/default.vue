@@ -65,7 +65,8 @@ export default {
       fixed: false,
       items: [
         { icon: "apps", title: "Bienvenue", to: "/" },
-        { icon: "map", title: "Carte", to: "/carte" }
+        { icon: "map", title: "Carte", to: "/carte" },
+        { icon: "show_chart", title: "Monitoring", to: "/monitoring" }
       ],
       miniVariant: false,
       right: true,

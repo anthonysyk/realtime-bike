@@ -14,8 +14,11 @@ case class KafkaConf(
                     )
 
 case class WebserviceConf(
+                         host: String,
                          port: Int
-                         )
+                         ) {
+  val hostport = s"$host:$port"
+}
 
 object AppConfig {
 
@@ -31,6 +34,7 @@ object AppConfig {
       kafkaConf.getString("bootstrap_server")
     ),
     WebserviceConf(
+      webserviceConf.getString("host"),
       webserviceConf.getInt("port")
     )
   )

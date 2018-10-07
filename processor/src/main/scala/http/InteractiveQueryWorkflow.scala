@@ -1,4 +1,4 @@
-package state
+package http
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -21,15 +21,15 @@ trait InteractiveQueryWorkflow extends LazyLogging {
 
     // setup REST endpoints
     val restEndpointPort = config.webservice.port
-    val restEndpointHostName = "localhost"
+    val restEndpointHostName = config.webservice.host
     val restEndpoint = new HostInfo(restEndpointHostName, restEndpointPort)
 
     logger.info("Connecting to Kafka cluster via bootstrap servers " + config.kafka.bootstrap_server)
     logger.warn("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
     println("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
 
-    implicit val system = ActorSystem()
-    implicit val materializer = ActorMaterializer()
+    implicit val system: ActorSystem = ActorSystem()
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
 
     // set up the topology
     val streams: KafkaStreams = createStreams()

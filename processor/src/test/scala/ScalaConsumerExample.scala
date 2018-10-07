@@ -1,8 +1,8 @@
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
+import deprecated.StateConsumer
 import org.reactivestreams.Publisher
-import state.StateConsumer
 
 class ScalaConsumerExample {
 

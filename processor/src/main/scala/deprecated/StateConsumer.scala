@@ -1,11 +1,10 @@
-package state
+package deprecated
 
 import java.util.concurrent.{ExecutorService, Executors}
 import java.util.{Collections, Properties}
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.stream.{ActorMaterializer, OverflowStrategy}
+import akka.stream.ActorMaterializer
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.reactivestreams.Publisher
 
@@ -24,9 +23,9 @@ class StateConsumer(val brokers: String,
 
   def shutdown() = {
     if (consumer != null)
-      consumer.close();
+      consumer.close()
     if (executor != null)
-      executor.shutdown();
+      executor.shutdown()
   }
 
   def createConsumerConfig(brokers: String, groupId: String): Properties = {

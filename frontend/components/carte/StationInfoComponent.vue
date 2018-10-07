@@ -11,7 +11,7 @@
     </v-card-title>
     <hr>
     <div class="grid-container">
-      <div/><div class="grid-item-text">Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>
+      <!--<div/><div class="grid-item-text">Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>-->
       <v-icon>directions_bike</v-icon><div class="grid-item-text"> {{ station.available_bikes }} vélo(s)</div>
       <v-icon>local_parking</v-icon><div class="grid-item-text"> {{ station.bike_stands }} place(s)</div>
     </div>
