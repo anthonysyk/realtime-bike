@@ -8,12 +8,15 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
 import com.lightbend.kafka.scala.iq.http.InteractiveQueryHttpService
 import enums.WindowInterval
+import models.StationReferential
 import org.apache.kafka.streams.state.HostInfo
 import routines.RoutineSupervisor
 import state.StateFetcher
+import utils.PathHelper
 import websocket.StateSocket
 
 import scala.concurrent.ExecutionContext
+import scala.io.Source
 import scala.util.{Failure, Success}
 
 class MyHTTPService(
@@ -53,6 +56,9 @@ class MyHTTPService(
         handleWebSocketMessages(StateSocket.start())
       }
     } ~
+      path("stations") {
+        complete(fetcher.fetchAllStationsReferential)
+      } ~
       pathPrefix("station") {
         (get & pathPrefix("access") & path(Segment)) {
           case "ALL" =>

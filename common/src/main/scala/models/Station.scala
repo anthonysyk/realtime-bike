@@ -1,8 +1,9 @@
 package models
 
 import utils.{PathHelper, Writer}
-
 import io.circe.syntax._
+import io.circe.parser._
+import scala.io.Source
 
 case class Station(
                     number: Int,
@@ -102,5 +103,4 @@ object StationReferential {
     println("Référentiel mis à jour")
 
   }
-
 }

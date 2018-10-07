@@ -1,10 +1,18 @@
 <template>
   <v-layout wrap>
     <v-flex text-xs-center>
-      <v-flex xs12 sm6 d-flex>
+      <v-flex xs12 sm9 d-flex>
+        <v-select v-model="selected"
+                  :items="cities"
+                  label="Choisissez une ville"
+        />
         <v-select v-model="selected"
                   :items="items"
-                  label="Choisissez une ville"
+                  label="Choisissez une station"
+        />
+        <v-select v-model="selected"
+                  :items="items"
+                  label="Choississez un interval"
         />
       </v-flex>
       <v-flex>
@@ -26,6 +34,7 @@ import MonthlyIncome from "~/components/monitoring/MonthlyIncome"
 export default {
   components: { MonthlyIncome },
   data: () => ({
+    cities: ["Lyon", "Marseille"],
     chartData: {
       labels: ["Mai", "Juin", "Juillet", "Aout", "Septembre"],
       datasets: [

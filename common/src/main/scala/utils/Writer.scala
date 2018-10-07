@@ -21,6 +21,8 @@ object PathHelper {
 
   lazy val ProcessorReferenceTest = getCanonical("./processor/src/test/resources")
 
+  lazy val CommonReference = getCanonical("./src/main/resources")
+
   lazy val StateStoreDirectory = getCanonical("./local_state_data")
 
   def main(args: Array[String]): Unit = {

@@ -1,5 +1,13 @@
-const state = () => {}
+const state = () => ({
+  station: []
+})
+
+const getters = {
+  getStation: state => state.station
+}
 
 export default {
-  state
+  namespaced: true,
+  state,
+  getters
 }

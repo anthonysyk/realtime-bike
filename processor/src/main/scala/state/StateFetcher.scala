@@ -5,7 +5,7 @@ import enums.WindowInterval
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
-import models.Station
+import models.{Station, StationReferential}
 import utils.date.DateHelper
 import versatile.utils.CirceHelper._
 
@@ -26,6 +26,15 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
     kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
       results.map {
         case (key, value) => parse(value).getRight.asObject.map(_.add("id", key.asJson))
+      }.asJson
+    )
+
+  def fetchAllStationsReferential =
+    kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
+      results.flatMap {
+        case (_, value) => parse(value).getRight.as[Station].right.toOption.map(station =>
+          StationReferential(station.externalId, station.number, station.contract_name)
+        ).toSeq
       }.asJson
     )
 
