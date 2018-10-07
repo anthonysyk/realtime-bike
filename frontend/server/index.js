@@ -11,26 +11,14 @@ app.set("port", port)
 let config = require("../nuxt.config.js")
 config.dev = !(process.env.NODE_ENV === "production")
 
-if (config.dev) {
-  app.use(
-    "/kafka",
-    proxy({
-      target: "http://192.168.1.26:4000",
-      changeOrigin: true
-    })
-  )
-} else {
-  app.use(
-    "/kafka",
-    proxy({
-      target: "http://localhost:9001",
-      changeOrigin: true,
-      pathRewrite: {
-        "^/kafka": ""
-      }
-    })
-  )
-}
+app.use(
+  "/kafka",
+  proxy({
+    target: "http://192.168.1.26:9001",
+    changeOrigin: true,
+    pathRewrite: { "^/kafka": "" }
+  })
+)
 
 async function start() {
   // Init Nuxt.js

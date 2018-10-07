@@ -7,7 +7,9 @@ const state = () => ({
 const getters = {
   getStations: state => state.stations,
   getStationsByContract: state => contract =>
-    state.stations.filter(station => station.contract_name === contract)
+    state.stations
+      .filter(station => station.contract_name === contract)
+      .map(station => station.id)
 }
 
 // actions

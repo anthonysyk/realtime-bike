@@ -1,54 +1,64 @@
 <template>
   <v-layout wrap>
     <v-flex text-xs-center>
-      <v-flex xs12 sm9 d-flex>
-        <v-select v-model="selected"
-                  :items="cities"
-                  label="Choisissez une ville"
-        />
-        <v-select v-model="selected"
-                  :items="items"
-                  label="Choisissez une station"
-        />
-        <v-select v-model="selected"
-                  :items="items"
-                  label="Choississez un interval"
+      <v-flex xs12 sm12 d-flex>
+        <v-flex xs12 sm6>
+          <v-select v-model="selectedCity" :items="cities"
+                    label="Choisissez une ville"
+          />
+        </v-flex>
+        <v-flex xs12 sm6>
+          <v-select
+            v-if="selectedCity.length > 0"
+            v-model="selectedStation"
+            :items="getStationsByCity(selectedCity)"
+            label="Choisissez une station"
+          />
+        </v-flex>
+      </v-flex>
+      <v-flex xs12 sm6>
+        <v-select
+          v-if="selectedStation.length > 0"
+          v-model="selectedInterval"
+          :items="intervals"
+          label="Search for an option"
+          hide-selected
+          solo
+          chips
+          @change="fetchStats({selectedInterval, selectedStation})"
         />
       </v-flex>
-      <v-flex>
-        <v-card>
-          <monthly-income :data="chartData"
-                          :options="{responsive: true, maintainAspectRatio: true}"
-                          :width="1000"
-                          :height="500"/>
-          <v-card/>
-        </v-card>
-      </v-flex>
+      <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval"/>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-import MonthlyIncome from "~/components/monitoring/MonthlyIncome"
+import MonitoringChart from "~/components/monitoring/MonitoringChart"
+
+import { createNamespacedHelpers } from "vuex"
+
+const { mapGetters, mapActions } = createNamespacedHelpers("monitoring")
 
 export default {
-  components: { MonthlyIncome },
+  components: { MonitoringChart },
   data: () => ({
+    selectedCity: {},
+    selectedStation: {},
+    selectedInterval: {},
     cities: ["Lyon", "Marseille"],
-    chartData: {
-      labels: ["Mai", "Juin", "Juillet", "Aout", "Septembre"],
-      datasets: [
-        {
-          label: "GitHub Commits",
-          backgroundColor: "#f87979",
-          data: [12000, 4500, 6200, 6200]
-        }
-      ],
-      fill: false
-    }
+    intervals: ["5min", "15min", "30min", "1h", "3h"]
   }),
   async fetch({ store }) {
-    store.dispatch("carte/fetchStations")
+    store.dispatch("monitoring/fetchStations")
+  },
+  computed: {
+    ...mapGetters(["getStationsByCity"])
+  },
+  methods: {
+    ...mapActions({
+      fetchStats: "fetchStats"
+    })
   }
 }
 </script>
