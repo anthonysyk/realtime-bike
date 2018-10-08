@@ -44,7 +44,7 @@ const mutations = {
     state.data = stats.map(station => station.available_bikes)
   },
   updateLabel(state, stats) {
-    state.labels = stats.map(station => station.last_update)
+    state.labels = stats.map(station => station.label)
   }
 }
 

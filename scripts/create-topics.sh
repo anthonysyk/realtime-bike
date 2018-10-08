@@ -19,5 +19,10 @@ $KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-f
 
 $KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window3h --config retention.ms=604800000
 
+$KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window12h --config retention.ms=604800000
+
+$KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window1j --config retention.ms=604800000
+
+
 $KAFKA_HOME/bin/kafka-topics --list --zookeeper localhost:2181
 

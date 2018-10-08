@@ -142,8 +142,11 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
     createStationStateWindow(stations, 60000 * 5, WINDOW_STATION_STATE_5min, "Window5min")
     createStationStateWindow(stations, 60000 * 15, WINDOW_STATION_STATE_15min, "Window15min")
     createStationStateWindow(stations, 60000 * 30, WINDOW_STATION_STATE_30min, "Window30min")
-    createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_1H, "Window1h")
-    createStationStateWindow(stations, 60000 * 60 * 3, WINDOW_STATION_STATE_3H, "Window3h")
+    createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_1h, "Window1h")
+    createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_3h, "Window3h")
+    createStationStateWindow(stations, 60000 * 60 * 12, WINDOW_STATION_STATE_12h, "Window12h")
+    createStationStateWindow(stations, 60000 * 60 * 24, WINDOW_STATION_STATE_1j, "Window1j")
+
 
     new KafkaStreams(builder.build(), streamingConfig)
   }

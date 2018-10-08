@@ -47,7 +47,7 @@ export default {
     selectedStation: {},
     selectedInterval: {},
     cities: ["Lyon", "Marseille"],
-    intervals: ["5min", "15min", "30min", "1h", "3h"]
+    intervals: ["5min", "15min", "30min", "1h", "3h", "12h", "1j"]
   }),
   async fetch({ store }) {
     store.dispatch("monitoring/fetchStations")

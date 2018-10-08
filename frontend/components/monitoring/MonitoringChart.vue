@@ -2,9 +2,9 @@
   <v-flex>
     <v-card>
       <line-chart :chart-data="getStats"
-                  :options="{responsive: true, maintainAspectRatio: true}"
+                  :options="{responsive: true, maintainAspectRatio: false}"
                   :width="1000"
-                  :height="500"/>
+                  :height="460"/>
     </v-card>
   </v-flex>
 </template>
