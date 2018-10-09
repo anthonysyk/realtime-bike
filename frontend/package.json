@@ -18,10 +18,10 @@
     "chart.js": "^2.7.2",
     "express": "^4.16.3",
     "node-sass": "^4.9.3",
-    "nuxt": "^1.0.0",
+    "nuxt": "^2.1.0",
     "sass-loader": "^7.1.0",
     "vue-chartjs": "^3.4.0",
-    "vuelayers": "^0.10.12",
+    "vuelayers": "^0.10.13",
     "vuetify": "^1.0.19"
   },
   "pre-commit": [
