@@ -44,7 +44,8 @@ export default {
   margin: 2rem 0 2rem 0;
   display: inline-grid;
   grid-template-columns: auto auto;
-  grid-column-gap: 50px;
+  grid-column-gap: 25px;
+  grid-row-gap: 7px;
 }
 
 .grid-item-text {
@@ -52,8 +53,8 @@ export default {
 }
 
 .overlay-content {
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 5px 10px;
+  font-size: 1rem;
   border-radius: 15px;
   ul {
     text-align: left;

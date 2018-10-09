@@ -13,6 +13,7 @@
             v-model="selectedStation"
             :items="getStationsByCity(selectedCity)"
             label="Choisissez une station"
+            @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation})"
           />
         </v-flex>
       </v-flex>

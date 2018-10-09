@@ -21,7 +21,7 @@
 
       <!-- selected feature popup -->
       <div v-for="station in getStations()" :key="`overlay-${station.id}`">
-        <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position" class="overlay-content">
+        <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position" :positioning="positionning" class="overlay-content">
           <template slot-scope="scope">
             <station-info-component :station="station"/>
           </template>
@@ -54,6 +54,7 @@
 
 <script>
 import { transformExtent } from "vuelayers/lib/_esm/ol-ext"
+import { OVERLAY_POSITIONING } from "vuelayers/lib/_esm/ol-ext/consts"
 import StationInfoComponent from "./StationInfoComponent"
 
 export default {
@@ -72,6 +73,7 @@ export default {
   },
   data() {
     return {
+      positionning: OVERLAY_POSITIONING.CENTER_CENTER,
       zoom: 2,
       center: [0, 0],
       rotation: 0,
@@ -87,12 +89,35 @@ export default {
     getStations() {
       return this.stations.filter(station => this.isInsideMap(station))
     },
+    getOverlayPosition() {
+      const xClick = this.clickCoordinate[0]
+      const yClick = this.clickCoordinate[1]
+
+      const { topLeft, bottomRight, bottomLeft, topRight } = this.corners
+
+      let vertical
+      let horizontal
+
+      if (Math.abs(yClick - topRight) > Math.abs(yClick - bottomLeft)) {
+        vertical = "bottom"
+      } else vertical = "top"
+
+      if (Math.abs(xClick - topLeft) > Math.abs(xClick - bottomRight)) {
+        horizontal = "right"
+      } else horizontal = "left"
+
+      if (xClick && yClick) {
+        this.positionning = `${vertical}-${horizontal}`
+      }
+    },
     isStationClicked(station) {
       const xClick = this.clickCoordinate[0]
       const yClick = this.clickCoordinate[1]
 
       const xStation = station.position[0]
       const yStation = station.position[1]
+
+      this.getOverlayPosition()
 
       function isInside(zClick, zStation) {
         return Math.abs(zClick - zStation) < 0.0004
