@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KAFKA_HOME=/opt/confluent-4.1.0
+KAFKA_HOME=/opt/confluent-5.0.0
 
 
 $KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Station --config retention.ms=86400000
@@ -21,7 +21,7 @@ $KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-f
 
 $KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window12h --config retention.ms=604800000
 
-$KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window1j --config retention.ms=604800000
+$KAFKA_HOME/bin/kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic Window1j --config retention.ms=2592000000
 
 
 $KAFKA_HOME/bin/kafka-topics --list --zookeeper localhost:2181

@@ -3,10 +3,11 @@
 cd "${0%/*}"
 
 remoteDir=/home/anthony/projects/paris-velib/frontend
-remoteHost=$1
+remoteHost="anthony@192.168.1.26"
+portNumber=222
 
 		rsync -avrc \
 		    --exclude 'deploy.sh' \
 		    --exclude 'node_modules/' \
-		    -e "ssh" \
+		    -e "ssh -p $portNumber" \
 			. "$remoteHost":"$remoteDir"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KAFKA_HOME=/opt/confluent-4.1.0
+KAFKA_HOME=/opt/confluent-5.0.0
 
 $KAFKA_HOME/bin/confluent stop
 

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-remoteHost="root@51.15.87.1"
-
 sbt pack
 
-collector/deploy.sh $remoteHost
+collector/deploy-old.sh
 
-processor/deploy.sh $remoteHost
+processor/deploy-old.sh
 
-frontend/deploy.sh $remoteHost
+frontend/deploy-old.sh
 
 remoteDir=/home/anthony/projects/paris-velib
+remoteHost="anthony@192.168.1.26"
+portNumber=222
 
 rsync -avrc --delete \
     --exclude tmp \
     --exclude-from ./deploy.sh \
-    -e "ssh" \
+    -e "ssh -p $portNumber" \
     scripts "$remoteHost":"$remoteDir"
