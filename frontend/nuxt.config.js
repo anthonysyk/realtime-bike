@@ -55,8 +55,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    baseURL: isDev ? "http://localhost:4000" : "http://192.168.1.26:4000",
-    browserBaseURL: isDev ? "http://localhost:4000" : "http://192.168.1.26:4000"
+    baseURL: isDev ? "http://localhost:4000" : "http://51.15.87.1:4000",
+    browserBaseURL: isDev ? "http://localhost:4000" : "http://51.15.87.1:4000"
   },
   /*
   ** Build configuration

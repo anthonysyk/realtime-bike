@@ -14,7 +14,7 @@ config.dev = !(process.env.NODE_ENV === "production")
 app.use(
   "/kafka",
   proxy({
-    target: "http://192.168.1.26:9001",
+    target: "http://51.15.87.1:9001",
     changeOrigin: true,
     pathRewrite: { "^/kafka": "" }
   })

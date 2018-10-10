@@ -1,5 +1,5 @@
 export default function({ store }) {
-  const socket = new WebSocket("ws://192.168.1.26:9001")
+  const socket = new WebSocket("ws://51.15.87.1:9001")
 
   socket.addEventListener("open", function() {
     socket.send("Hello Server!")
