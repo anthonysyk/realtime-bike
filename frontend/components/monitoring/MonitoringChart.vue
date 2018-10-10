@@ -30,7 +30,7 @@ export default {
       () => {
         return this.$store.getters["monitoring/getStats"] // could also put a Getter here
       },
-      (newValue, oldValue) => {
+      () => {
         //something changed do something
       },
       //Optional Deep if you need it
