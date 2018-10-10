@@ -140,8 +140,6 @@ export default {
     onMapPostCompose() {
       if (this.currExtent === this.$refs.map.$map.frameState_.extent) return
 
-      console.log("update corners")
-
       const cornerCoordinates = transformExtent(
         this.$refs.map.$map.frameState_.extent,
         "EPSG:3857",

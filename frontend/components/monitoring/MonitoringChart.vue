@@ -32,8 +32,6 @@ export default {
       },
       (newValue, oldValue) => {
         //something changed do something
-        console.log(oldValue)
-        console.log(newValue)
       },
       //Optional Deep if you need it
       {

@@ -22,8 +22,6 @@ const actions = {
         }),
       {}
     )
-    console.log(stations[0])
-    console.log(parsedStations[0])
     commit("updateStations", parsedStations)
   }
 }
