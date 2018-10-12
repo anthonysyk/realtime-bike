@@ -5,7 +5,7 @@ import versatile.web.WebClient
 
 import scala.concurrent.Future
 
-class JCDecauxService(config: AppConfig) extends WebClient {
+class BikeApiService(config: AppConfig) extends WebClient {
 
   val stationsUrl = s"${config.api.api_url}/stations"
 
@@ -33,5 +33,8 @@ class JCDecauxService(config: AppConfig) extends WebClient {
     doGet(stationsUrl, args)
   }
 
+  val parisStations = "https://www.velib-metropole.fr/webapi/map/details?gpsTopLatitude=50.92472720355735&gpsTopLongitude=2.526699071550297&gpsBotLatitude=48.80050394038224&gpsBotLongitude=2.1061286980111618&zoomLevel=14"
+
+  def getParisStations = doGet(parisStations)
 
 }

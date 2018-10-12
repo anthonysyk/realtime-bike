@@ -1,9 +1,7 @@
 package models
 
-import utils.{PathHelper, Writer}
 import io.circe.syntax._
-import io.circe.parser._
-import scala.io.Source
+import utils.{PathHelper, Writer}
 
 case class Station(
                     number: Int,

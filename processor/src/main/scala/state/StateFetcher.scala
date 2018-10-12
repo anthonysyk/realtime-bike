@@ -16,9 +16,6 @@ import scala.concurrent.Future
 
 class StateFetcher(kvf: KeyValueFetcher[String, String]) {
 
-  val toTime = DateHelper.tomorrowTimestamp
-  val fromTime = DateHelper.oldestTimestamp
-
   def fetchStationsStateByKey(hostKey: String) =
     kvf.fetch(hostKey, StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/" + hostKey)
       .map(result => parse(result).getRight)
@@ -41,6 +38,8 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
     )
 
   def fetchWindow(hostKey: String, window: String) = {
+    val toTime = DateHelper.tomorrowTimestamp
+    val fromTime = DateHelper.oldestTimestamp
     val elements = kvf.fetchWindowed(hostKey, WindowInterval.createNamespace(window), WindowInterval.createPath(window), fromTime, toTime).map(results =>
       results.distinct.flatMap(value => parse(value._2).getRight.as[Station].right.toOption.toSeq)
         .sortBy(_.last_update)
