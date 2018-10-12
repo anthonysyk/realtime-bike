@@ -59,12 +59,17 @@ class MyHTTPService(
       path("stations") {
         complete(fetcher.fetchAllStationsReferential)
       } ~
+      path("station" / "access" / Segment) {
+        case "ALL" =>
+          complete {
+            fetcher.fetchAllStationsState
+          }
+        case contract@_ => complete {
+          fetcher.fetchStationsStateByContract(contract)
+        }
+      } ~
       pathPrefix("station") {
         (get & pathPrefix("access") & path(Segment)) {
-          case "ALL" =>
-            complete {
-              fetcher.fetchAllStationsState
-            }
           case hostKey@_ =>
             complete {
               fetcher.fetchStationsStateByKey(hostKey)

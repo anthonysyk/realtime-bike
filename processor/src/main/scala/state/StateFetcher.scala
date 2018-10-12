@@ -28,11 +28,18 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
       }.asJson
     )
 
+  def fetchStationsStateByContract(contract: String) =
+    kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
+      results.map {
+        case (key, value) => parse(value).getRight.as[Station].right.toOption
+      }.filter(_.exists(_.contract_name == contract)).flatMap(_.toSeq).asJson
+    )
+
   def fetchAllStationsReferential =
     kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
       results.flatMap {
         case (_, value) => parse(value).getRight.as[Station].right.toOption.map(station =>
-          StationReferential(station.externalId, station.number, station.contract_name)
+          StationReferential(station.externalId, station.number, station.contract_name, station.address)
         ).toSeq
       }.asJson
     )

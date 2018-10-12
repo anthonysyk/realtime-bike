@@ -8,7 +8,7 @@ const getters = {
   getStationsByCity: state => city =>
     state.stations
       .filter(station => station.contract_name === city)
-      .map(station => station.id),
+      .map(station => ({ text: station.address, value: station.id })),
   getStats: state => ({
     labels: state.labels,
     datasets: [
@@ -29,7 +29,7 @@ const actions = {
   },
   async fetchStats({ commit }, { selectedInterval, selectedStation }) {
     const stats = await this.$axios.$get(
-      `kafka/station/access/win/${selectedInterval}/${selectedStation}`
+      `kafka/station/access/win/${selectedInterval}/${selectedStation.value}`
     )
     commit("updateData", stats)
     commit("updateLabel", stats)

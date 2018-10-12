@@ -23,7 +23,7 @@ class RoutineSupervisor(websocketActor: ActorRef)(implicit fetcher: StateFetcher
     )
 
     actorSystem.scheduler.schedule(
-      1.second,
+      1.minute,
       10.minute,
       runtimeActor,
       RuntimeActor.MemoryTick

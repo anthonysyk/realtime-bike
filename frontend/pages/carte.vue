@@ -31,13 +31,26 @@ export default {
       carte: {
         city: null,
         zoom: 5,
-        center: [2.552748209185793, 46.90598730737233],
+        center: [2.3380340037250313, 48.85926008555791],
         rotation: 0,
         geolocPosition: undefined,
         stations: []
       }
     },
     items: [
+      {
+        text: "Paris",
+        value: {
+          carte: {
+            city: "Paris",
+            zoom: 15,
+            center: [2.3256653515384667, 48.86351312359906],
+            rotation: 0,
+            geolocPosition: undefined,
+            stations: []
+          }
+        }
+      },
       {
         text: "Lyon",
         value: {

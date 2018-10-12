@@ -77,7 +77,7 @@ object StationState {
 }
 
 
-case class StationReferential(id: String, number: Int, contract_name: String)
+case class StationReferential(id: String, number: Int, contract_name: String, address: String)
 
 object StationReferential {
 
@@ -93,7 +93,8 @@ object StationReferential {
       StationReferential(
         externalId,
         number,
-        contract_name
+        contract_name,
+        address
       )
     }.asJson.noSpaces
 

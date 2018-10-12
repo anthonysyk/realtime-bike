@@ -13,16 +13,18 @@
             v-model="selectedStation"
             :items="getStationsByCity(selectedCity)"
             label="Choisissez une station"
+            return-object
             @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation})"
           />
+          {{ selectedStation }}
         </v-flex>
       </v-flex>
       <v-flex xs12 sm6>
         <v-select
-          v-if="selectedStation.length > 0"
+          v-if="selectedStation.value.length > 0"
           v-model="selectedInterval"
           :items="intervals"
-          label="Search for an option"
+          label="Sélectionnez un interval"
           hide-selected
           solo
           chips
@@ -45,9 +47,9 @@ export default {
   components: { MonitoringChart },
   data: () => ({
     selectedCity: {},
-    selectedStation: {},
+    selectedStation: { text: "", value: "" },
     selectedInterval: {},
-    cities: ["Lyon", "Marseille"],
+    cities: ["Paris", "Lyon", "Marseille"],
     intervals: ["5min", "15min", "30min", "1h", "3h", "12h", "1j"]
   }),
   async fetch({ store }) {
