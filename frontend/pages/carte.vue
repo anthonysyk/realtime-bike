@@ -5,11 +5,12 @@
         <v-select v-model="selected"
                   :items="items"
                   label="Choisissez une ville"
+                  @change="fetchStations(selected.carte.city)"
         />
       </v-flex>
       <v-flex>
         <v-card>
-          <carte-component v-model="selected.carte" :stations="getStationsByContract(selected.carte.city)"/>
+          <carte-component v-model="selected.carte" :stations="getStations"/>
         </v-card>
       </v-flex>
     </v-flex>
@@ -20,7 +21,7 @@
 import CarteComponent from "~/components/carte/Carte.vue"
 import { createNamespacedHelpers } from "vuex"
 
-const { mapGetters } = createNamespacedHelpers("carte")
+const { mapGetters, mapActions } = createNamespacedHelpers("carte")
 
 export default {
   components: {
@@ -79,11 +80,11 @@ export default {
       }
     ]
   }),
-  async fetch({ store }) {
-    store.dispatch("carte/fetchStations")
-  },
   computed: {
     ...mapGetters(["getStationsByContract", "getStations"])
+  },
+  methods: {
+    ...mapActions(["fetchStations"])
   }
 }
 </script>

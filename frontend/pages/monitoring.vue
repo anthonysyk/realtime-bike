@@ -16,7 +16,6 @@
             return-object
             @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation})"
           />
-          {{ selectedStation }}
         </v-flex>
       </v-flex>
       <v-flex xs12 sm6>

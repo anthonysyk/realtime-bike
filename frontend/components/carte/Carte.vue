@@ -34,7 +34,7 @@
             <vl-style-stroke :color="getStationColor(station.status)"/>
             <vl-style-fill color="rgba(255,255,255,0.5)"/>
           </vl-style-box>
-        </vl-feature>`
+        </vl-feature>
         <!--CIRCLES-->
 
       </div>
@@ -46,8 +46,6 @@
       Rotation: {{ value.rotation }}<br>
       Click: {{ clickCoordinate }}<br>
       Stations: {{ getStations().length }}<br>
-
-      Exemple: {{ stations[0] && stations[0].position }}
     </div>
   </div>
 </template>
