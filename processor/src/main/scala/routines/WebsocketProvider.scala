@@ -19,7 +19,7 @@ trait WebsocketProvider extends Actor {
   def receive = {
     case FetchTick => fetchState.map { json =>
       println("sending data to websocket")
-      actorRef ! json.noSpaces
+      //actorRef ! json.noSpaces
     }
   }
 

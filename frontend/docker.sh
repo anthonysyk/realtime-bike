@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 remoteDir=/home/anthony/projects/paris-velib/frontend
-port=4000
+port=80
 
 docker rmi paris-velib/frontend
 

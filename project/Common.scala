@@ -1,20 +1,13 @@
+import Versions._
 import sbt._
-import Keys._
 
 object Common {
   lazy val dependencies = {
     new {
-      val kafkaV = "1.0.1"
-      val kafka_streams_scala_version = "0.2.1"
-      val kafka_streams_query_version = "0.1.1"
-      val circeVersion = "0.9.1"
-      val CuratorVersion      = "4.0.0"
-      val MinitestVersion     = "2.0.0"
 
       val curator      = "org.apache.curator"         % "curator-test"    % CuratorVersion
       val minitest     = "io.monix"                   %% "minitest"       % MinitestVersion % "test"
       val minitestLaws = "io.monix"                   %% "minitest-laws"  % MinitestVersion % "test"
-
 
       val kafka_all = Seq(
         "org.apache.kafka" % "kafka_2.11" % kafkaV excludeAll (ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("org.apache.zookeeper",

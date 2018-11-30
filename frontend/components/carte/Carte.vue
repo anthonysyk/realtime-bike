@@ -2,7 +2,7 @@
   <div class="map">
     <vl-map ref="map" :load-tiles-while-animating="true"
             :load-tiles-while-interacting="true" data-projection="EPSG:4326"
-            style="height: 70vh" @click="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
+            style="height: 70vh" @click="clickCoordinate = $event.coordinate" @pointermove="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
       <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
       <vl-geoloc>
         <template slot-scope="geoloc">
@@ -20,7 +20,7 @@
       </vl-layer-tile>
 
       <!-- selected feature popup -->
-      <div v-for="station in getStations()" :key="`overlay-${station.id}`">
+      <div v-for="station in getStations()" :key="`overlay-${station.number}`">
         <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position" :positioning="positionning" class="overlay-content">
           <template slot-scope="scope">
             <station-info-component :station="station"/>

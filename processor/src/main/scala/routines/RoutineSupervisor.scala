@@ -2,6 +2,7 @@ package routines
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import state.StateFetcher
+import versatile.memory.RuntimeMemoryActor
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -12,11 +13,11 @@ class RoutineSupervisor(websocketActor: ActorRef)(implicit fetcher: StateFetcher
 
   // Routines actors sending data to the websocket
   val websocketStateActor: ActorRef = actorSystem.actorOf(WebsocketStateActor.props(websocketActor), "state")
-  val runtimeActor = actorSystem.actorOf(Props(new RuntimeActor))
+  val runtimeActor = actorSystem.actorOf(Props(new RuntimeMemoryActor))
 
   def run(): Unit = {
     actorSystem.scheduler.schedule(
-      1.second,
+      1.minute,
       1.minute,
       websocketStateActor,
       WebsocketProvider.FetchTick
@@ -24,9 +25,9 @@ class RoutineSupervisor(websocketActor: ActorRef)(implicit fetcher: StateFetcher
 
     actorSystem.scheduler.schedule(
       1.minute,
-      10.minute,
+      5.minute,
       runtimeActor,
-      RuntimeActor.MemoryTick
+      RuntimeMemoryActor.MemoryTick
     )
   }
 

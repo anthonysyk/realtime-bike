@@ -8,5 +8,5 @@ WORKDIR /home/paris-velib/frontend
 RUN [ "npm", "install" ]
 CMD [ "npm", "start" ]
 
-EXPOSE 4000
+EXPOSE 80
 

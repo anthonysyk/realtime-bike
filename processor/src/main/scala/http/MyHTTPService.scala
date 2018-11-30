@@ -34,26 +34,14 @@ class MyHTTPService(
 
   routineSupervisor.run()
 
-  // start the http server
-  override def start(): Unit = {
-    bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", hostInfo.port)
-
-    bindingFuture.onComplete {
-      case Success(serverBinding) =>
-        logger.info(s"Server bound to ${serverBinding.localAddress} ")
-
-      case Failure(ex) =>
-        logger.error(s"Failed to bind to ${hostInfo.host}:${hostInfo.port}!", ex)
-        actorSystem.terminate()
-    }
-  }
-
   // define the routes
   val routes: Flow[HttpRequest, HttpResponse, Any] = {
     get {
-      pathSingleSlash {
-        StateSocket.ensurePublisherIsAlive()
-        handleWebSocketMessages(StateSocket.start())
+      path("ws") {
+        parameter('window) { window =>
+          StateSocket.ensurePublisherIsAlive()
+          handleWebSocketMessages(StateSocket.start)
+        }
       }
     } ~
       path("stations") {
@@ -83,5 +71,19 @@ class MyHTTPService(
             } else complete(StatusCodes.NotAcceptable, "not a valid window interval")
           }
       }
+  }
+
+  // start the http server
+  override def start(): Unit = {
+    bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", hostInfo.port)
+
+    bindingFuture.onComplete {
+      case Success(serverBinding) =>
+        logger.info(s"Server bound to ${serverBinding.localAddress} ")
+
+      case Failure(ex) =>
+        logger.error(s"Failed to bind to ${hostInfo.host}:${hostInfo.port}!", ex)
+        actorSystem.terminate()
+    }
   }
 }

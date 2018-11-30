@@ -10,7 +10,7 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: pkg.name,
+    title: "Real-Time Bike",
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -55,8 +55,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    baseURL: isDev ? "http://localhost:4000" : "http://51.15.87.1:4000",
-    browserBaseURL: isDev ? "http://localhost:4000" : "http://51.15.87.1:4000"
+    baseURL: isDev ? "http://localhost:4000" : "http://realtime-bike.fr:80",
+    browserBaseURL: isDev ? "http://localhost:4000" : "http://realtime-bike.fr:80"
   },
   /*
   ** Build configuration

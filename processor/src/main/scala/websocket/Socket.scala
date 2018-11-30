@@ -19,14 +19,15 @@ trait Socket {
   val fetcher: StateFetcher
 
   val config = AppConfig.conf
+  val MAX_MESSAGES = 1500
 
   //  https://markatta.com/codemonkey/blog/2016/04/18/chat-with-akka-http-websockets/
-  val (websocketActor: ActorRef, publisher: Publisher[String]) = Source.actorRef[String](bufferSize = 1000000, OverflowStrategy.fail)
+  val (websocketActor: ActorRef, publisher: Publisher[String]) = Source.actorRef[String](bufferSize = 2000, OverflowStrategy.dropBuffer)
     .toMat(Sink.asPublisher(true))(Keep.both).run()
 
-  val finalSource: Source[TextMessage.Strict, NotUsed] = Source.fromPublisher(publisher).map(record => TextMessage(record))
+  val finalSource: Source[TextMessage.Strict, NotUsed] = Source.fromPublisher(publisher).limit(MAX_MESSAGES).map(record => TextMessage(record))
 
-  def start(): Flow[Message, TextMessage, NotUsed] = {
+  def start: Flow[Message, TextMessage, NotUsed] = {
     println("Starting websocket flow")
 
     val sink = Flow[Message].map {
