@@ -15,8 +15,8 @@
         </template>
       </vl-geoloc>
 
-      <vl-layer-tile id="sputnik">
-        <vl-source-sputnik/>
+      <vl-layer-tile id="osm">
+        <vl-source-osm/>
       </vl-layer-tile>
 
       <!-- selected feature popup -->
@@ -32,7 +32,7 @@
           <vl-geom-circle :coordinates="station.position" :radius="60"/>
           <vl-style-box>
             <vl-style-stroke :color="getStationColor(station.status)"/>
-            <vl-style-fill color="rgba(255,255,255,0.5)"/>
+            <vl-style-fill :color="getStationColor(station.status)"/>
           </vl-style-box>
         </vl-feature>
         <!--CIRCLES-->

@@ -47,7 +47,7 @@ export default {
   data: () => ({
     selectedCity: {},
     selectedStation: { text: "", value: "" },
-    selectedInterval: {},
+    selectedInterval: "5min",
     cities: ["Paris", "Lyon", "Marseille"],
     intervals: ["5min", "15min", "30min", "1h", "3h", "12h", "1j"]
   }),
