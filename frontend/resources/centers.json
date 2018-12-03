@@ -1,0 +1,54 @@
+{
+  "default": {
+    "carte": {
+      "city": null,
+      "zoom": 5,
+      "center": [
+        2.3380340037250313,
+        48.85926008555791
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  "paris": {
+    "carte": {
+      "city": "Paris",
+      "zoom": 15,
+      "center": [
+        2.3256653515384667,
+        48.86351312359906
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  "lyon": {
+    "carte": {
+      "city": "Lyon",
+      "zoom": 15,
+      "center": [
+        4.842469526028807,
+        45.755144634660354
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  "marseille": {
+    "carte": {
+      "city": "Marseille",
+      "zoom": 15,
+      "center": [
+        5.3809710350488436,
+        43.29184455955078
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  }
+}

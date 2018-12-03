@@ -1,10 +1,14 @@
-const state = () => ({
+const getEmptyState = () => ({
   stations: [],
+  fullStations: [],
   labels: [],
   data: []
 })
 
+const state = () => getEmptyState()
+
 const getters = {
+  getFullStations: state => state.fullStations,
   getStationsByCity: state => city =>
     state.stations
       .filter(station => station.contract_name === city)
@@ -23,6 +27,18 @@ const getters = {
 }
 
 const actions = {
+  async fetchFullStations({ commit }, city) {
+    const fullStations = await this.$axios.$get(`/kafka/station/access/${city}`)
+    const parsedStations = fullStations.map(
+      station =>
+        Object.assign({
+          ...station,
+          position: [station.position.lng, station.position.lat]
+        }),
+      {}
+    )
+    commit("updateFullStations", parsedStations)
+  },
   async fetchStations({ commit }) {
     const stations = await this.$axios.$get("/kafka/stations")
     commit("updateStations", stations)
@@ -37,6 +53,9 @@ const actions = {
 }
 
 const mutations = {
+  updateFullStations(state, stations) {
+    state.fullStations = stations
+  },
   updateStations(state, stations) {
     state.stations = stations
   },
@@ -45,6 +64,9 @@ const mutations = {
   },
   updateLabel(state, stats) {
     state.labels = stats.map(station => station.label)
+  },
+  resetState(state) {
+    Object.assign(state, getEmptyState())
   }
 }
 

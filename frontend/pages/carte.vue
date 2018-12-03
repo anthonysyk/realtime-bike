@@ -20,6 +20,7 @@
 <script>
 import CarteComponent from "~/components/carte/Carte.vue"
 import { createNamespacedHelpers } from "vuex"
+import centers from "~/resources/centers.json"
 
 const { mapGetters, mapActions } = createNamespacedHelpers("carte")
 
@@ -28,55 +29,20 @@ export default {
     CarteComponent
   },
   data: () => ({
-    selected: {
-      carte: {
-        city: null,
-        zoom: 5,
-        center: [2.3380340037250313, 48.85926008555791],
-        rotation: 0,
-        geolocPosition: undefined,
-        stations: []
-      }
-    },
+    centers: centers,
+    selected: centers.default,
     items: [
       {
         text: "Paris",
-        value: {
-          carte: {
-            city: "Paris",
-            zoom: 15,
-            center: [2.3256653515384667, 48.86351312359906],
-            rotation: 0,
-            geolocPosition: undefined,
-            stations: []
-          }
-        }
+        value: centers.paris
       },
       {
         text: "Lyon",
-        value: {
-          carte: {
-            city: "Lyon",
-            zoom: 15,
-            center: [4.842469526028807, 45.755144634660354],
-            rotation: 0,
-            geolocPosition: undefined,
-            stations: []
-          }
-        }
+        value: centers.lyon
       },
       {
         text: "Marseille",
-        value: {
-          carte: {
-            city: "Marseille",
-            zoom: 15,
-            center: [5.3809710350488436, 43.29184455955078],
-            rotation: 0,
-            geolocPosition: undefined,
-            stations: []
-          }
-        }
+        value: centers.marseille
       }
     ]
   }),
