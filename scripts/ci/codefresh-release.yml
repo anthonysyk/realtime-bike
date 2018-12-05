@@ -1,0 +1,43 @@
+version: '1.0'
+
+steps:
+  export_version:
+    title: Creating Version Variables
+    image: frolvlad/alpine-bash
+    working_directory: ${{main_clone}}
+    commands:
+    - cf_export CURR_VERSION=$(cat version)
+    - cf_export RELEASE_VERSION=$(sed 's/-.*//' version)
+    - cf_export NEXT_VERSION=$(echo "$(sed 's/-.*//' version) + 0.01" | bc -l)-SNAPSHOT
+  increment_version:
+    title: Update Project Version
+    image: codefreshio/git-image:latest
+    working_directory: ${{main_clone}}
+    commands:
+    - git config --global push.default simple
+    - git config --global user.name ${{GITHUB_USER}}
+    - git config --global user.email ${{GITHUB_EMAIL}}
+    - git checkout ${{CF_BRANCH}}
+    - git pull --rebase https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git ${{CF_BRANCH}}
+    - echo "$RELEASE_VERSION" > 'version'
+    - git add .
+    - git commit -m "Setting version to $(echo $RELEASE_VERSION)" && git branch && git status
+    - git pull --rebase https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git ${{CF_BRANCH}}
+    - git push https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git
+    - git tag | xargs git tag -d
+    - git tag -a v$RELEASE_VERSION -m "Releasing $(echo $RELEASE_VERSION)"
+    - git push https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git --tags
+  increment_version_snapshot:
+    title: Update Project Version to SNAPSHOT
+    image: codefreshio/git-image:latest
+    working_directory: ${{main_clone}}
+    commands:
+    - git config --global push.default simple
+    - git config --global user.name ${{GITHUB_USER}}
+    - git config --global user.email ${{GITHUB_EMAIL}}
+    - git checkout ${{CF_BRANCH}}
+    - echo "$NEXT_VERSION" > 'version'
+    - git add .
+    - git commit -m "Setting version to $(echo $NEXT_VERSION)" && git branch && git status
+    - git pull --rebase https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git ${{CF_BRANCH}}
+    - git push https://${{GITHUB_USER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git
