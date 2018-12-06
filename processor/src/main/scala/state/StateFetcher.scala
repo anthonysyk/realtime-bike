@@ -3,9 +3,9 @@ package state
 import enums.WindowInterval
 import io.circe.Json
 import io.circe.generic.auto._
-import io.circe.parser._
+import io.circe.parser.{parse, _}
 import io.circe.syntax._
-import models.{Station, StationReferential}
+import models.{Coordinates, Station, StationReferential}
 import utils.date.{ChartDateHelper, DateHelper}
 import versatile.json.CirceHelper._
 import versatile.kafka.iq.http.KeyValueFetcher
@@ -64,7 +64,20 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
         .add("label", Json.fromString(label))
     }.asJson
 
+  }
 
+  def fetchStationsStateByKeyWithCoordinates(hostKey: String, coordinates: Coordinates) = {
+    for {
+      stations <- kvf.fetch(hostKey, StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/" + hostKey)
+      .map(result => parse(result).getRight.as[Station].right.toOption.toSeq)
+      stationsInsideMap = stations.filter { station =>
+        val stationX = station.position.lat
+        val stationY = station.position.lng
+        val isXInside = stationX > coordinates.topLeft && stationX < coordinates.bottomRight
+        val isYInside = stationY > coordinates.bottomLeft && stationY < coordinates.topRight
+        isXInside && isYInside
+      }
+    } yield stationsInsideMap
   }
 
 }

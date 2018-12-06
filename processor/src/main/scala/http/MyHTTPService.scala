@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
 import enums.WindowInterval
+import models.Coordinates
 import org.apache.kafka.streams.state.HostInfo
 import routines.RoutineSupervisor
 import state.StateFetcher
@@ -54,12 +55,19 @@ class MyHTTPService(
         }
       } ~
       pathPrefix("station") {
-        (get & pathPrefix("access") & path(Segment)) {
-          case hostKey@_ =>
+        (post & pathPrefix("access" / "coordinates") & path(Segment)) { case hostKey@_ =>
+          entity(as[Coordinates]) { coordinates =>
             complete {
-              fetcher.fetchStationsStateByKey(hostKey)
+              fetcher.fetchStationsStateByKeyWithCoordinates(hostKey, coordinates)
             }
+          }
         } ~
+          (get & pathPrefix("access") & path(Segment)) {
+            case hostKey@_ =>
+              complete {
+                fetcher.fetchStationsStateByKey(hostKey)
+              }
+          } ~
           (get & pathPrefix("access" / "win" / Segment / Segment)) { (window, hostKey) =>
             if (WindowInterval.validateInterval(window)) {
               complete {

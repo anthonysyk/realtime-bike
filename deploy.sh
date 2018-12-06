@@ -13,6 +13,7 @@ frontend/deploy.sh $remoteHost
 remoteDir=/home/anthony/projects/paris-velib
 
 rsync -avrc --delete \
+    --delete \
     --exclude tmp \
     --exclude-from ./deploy.sh \
     -e "ssh" \
