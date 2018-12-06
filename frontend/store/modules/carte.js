@@ -23,6 +23,21 @@ const actions = {
       {}
     )
     commit("updateStations", parsedStations)
+  },
+  async fetchStationsWithCoordinates({ commit }, {city, coordinates}) {
+    const stations = await this.$axios.$post(
+      `/kafka/station/access/${city}`,
+      coordinates
+    )
+    const parsedStations = stations.map(
+      station =>
+        Object.assign({
+          ...station,
+          position: [station.position.lng, station.position.lat]
+        }),
+      {}
+    )
+    commit("updateStations", parsedStations)
   }
 }
 

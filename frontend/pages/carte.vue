@@ -5,12 +5,12 @@
         <v-select v-model="selected"
                   :items="items"
                   label="Choisissez une ville"
-                  @change="fetchStations(selected.carte.city)"
         />
       </v-flex>
       <v-flex>
         <v-card>
-          <carte-component v-model="selected.carte" :stations="getStations"/>
+          <carte-component v-model="selected.carte" :stations="getStations"
+                           @fetchStationsEmit="fetchStationsWithCoordinatesWrapper"/>
         </v-card>
       </v-flex>
     </v-flex>
@@ -50,7 +50,15 @@ export default {
     ...mapGetters(["getStationsByContract", "getStations"])
   },
   methods: {
-    ...mapActions(["fetchStations"])
+    ...mapActions(["fetchStations"]),
+    fetchStationsWithCoordinatesWrapper(coordinates) {
+      if (this.selected.carte !== undefined) {
+        this.$store.dispatch("carte/fetchStationsWithCoordinates", {
+          city: this.selected.carte.city,
+          coordinates
+        })
+      }
+    }
   }
 }
 </script>
