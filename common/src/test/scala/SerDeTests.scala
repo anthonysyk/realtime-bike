@@ -1,7 +1,7 @@
 import io.circe.parser._
 import io.circe.syntax._
 import models.Station
-import versatile.utils.CirceHelper._
+import versatile.json.CirceHelper._
 import minitest._
 
 

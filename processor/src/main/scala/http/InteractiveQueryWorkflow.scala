@@ -2,18 +2,18 @@ package http
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.lightbend.kafka.scala.iq.http.InteractiveQueryHttpService
-import com.typesafe.scalalogging.LazyLogging
 import config.AppConfig
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.state.HostInfo
+import versatile.kafka.iq.http.http.InteractiveQueryHttpService
 
-trait InteractiveQueryWorkflow extends LazyLogging {
+trait InteractiveQueryWorkflow {
 
   val config = AppConfig.conf
 
   def startRestProxy(streams: KafkaStreams, hostInfo: HostInfo,
-                     actorSystem: ActorSystem, materializer: ActorMaterializer): InteractiveQueryHttpService
+                     actorSystem: ActorSystem,
+                     materializer: ActorMaterializer): InteractiveQueryHttpService
 
   def createStreams(): KafkaStreams
 
@@ -24,8 +24,7 @@ trait InteractiveQueryWorkflow extends LazyLogging {
     val restEndpointHostName = config.webservice.host
     val restEndpoint = new HostInfo(restEndpointHostName, restEndpointPort)
 
-    logger.info("Connecting to Kafka cluster via bootstrap servers " + config.kafka.bootstrap_server)
-    logger.warn("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
+    println("Connecting to Kafka cluster via bootstrap servers " + config.kafka.bootstrap_server)
     println("REST endpoint at http://" + restEndpointHostName + ":" + restEndpointPort)
 
     implicit val system: ActorSystem = ActorSystem()

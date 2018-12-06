@@ -4,7 +4,6 @@ import akka.actor.{Actor, Props}
 import config.AppConfig
 import models.{ParisStation, Station, SummaryParisStation}
 import utils.date.DateHelper
-import versatile.kafka.EmbeddedKafkaHelper
 import webservice.TickActor.{FetchStationsStatus, FetchParisStationStatus}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,23 +26,6 @@ object StationCollector {
     akkaService.system.scheduler.schedule(5.seconds, 60.seconds) {
       tickActor ! FetchStationsStatus(akkaService, producer)
       tickActor ! FetchParisStationStatus(akkaService, producer)
-    }
-  }
-
-  def startCollectorEmbedded(appConfig: AppConfig) = {
-    val akkaService: BikeApiService = new BikeApiService(appConfig)
-    val tickActor = akkaService.system.actorOf(Props[TickActor], name = "tick-actor")
-
-    val embeddedKafka = new EmbeddedKafkaHelper {
-      override val topics: Seq[String] = "Station" :: "Station.logs" :: Nil
-    }
-
-    embeddedKafka.startEmbeddedKafka()
-
-    val producer = new StationProducerEmbedded(appConfig)
-
-    akkaService.system.scheduler.schedule(5.seconds, 1.minute) {
-      tickActor ! FetchStationsStatus(akkaService, producer)
     }
   }
 

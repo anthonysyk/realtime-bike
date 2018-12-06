@@ -6,17 +6,14 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
-import com.lightbend.kafka.scala.iq.http.InteractiveQueryHttpService
 import enums.WindowInterval
-import models.StationReferential
 import org.apache.kafka.streams.state.HostInfo
 import routines.RoutineSupervisor
 import state.StateFetcher
-import utils.PathHelper
+import versatile.kafka.iq.http.http.InteractiveQueryHttpService
 import websocket.StateSocket
 
 import scala.concurrent.ExecutionContext
-import scala.io.Source
 import scala.util.{Failure, Success}
 
 class MyHTTPService(
@@ -79,10 +76,10 @@ class MyHTTPService(
 
     bindingFuture.onComplete {
       case Success(serverBinding) =>
-        logger.info(s"Server bound to ${serverBinding.localAddress} ")
+        println(s"Server bound to ${serverBinding.localAddress} ")
 
       case Failure(ex) =>
-        logger.error(s"Failed to bind to ${hostInfo.host}:${hostInfo.port}!", ex)
+        println(s"Failed to bind to ${hostInfo.host}:${hostInfo.port}!", ex)
         actorSystem.terminate()
     }
   }

@@ -95,7 +95,7 @@ object ParisStation {
   import io.circe._
   import io.circe.generic.semiauto._
   import io.circe.parser._
-  import versatile.utils.CirceHelper._
+  import versatile.json.CirceHelper._
 
   implicit val decoderStationInfo: Decoder[StationInfo] = deriveDecoder[StationInfo]
   implicit val encoderStationInfo: Encoder[StationInfo] = deriveEncoder[StationInfo]

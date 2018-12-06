@@ -1,34 +1,37 @@
 package state
 
+import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.lightbend.kafka.scala.iq.http.{HttpRequester, KeyValueFetcher}
-import com.lightbend.kafka.scala.iq.serializers.Serializers
-import com.lightbend.kafka.scala.iq.services.{LocalStateStoreQuery, MetadataService}
-import com.lightbend.kafka.scala.streams.{KStreamS, StreamsBuilderS}
 import enums.WindowInterval
 import http.{InteractiveQueryWorkflow, MyHTTPService}
 import io.circe.parser._
 import io.circe.syntax._
-import models.{Serde, Station}
+import models.{CustomSerde, Station}
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.kstream.{Materialized, Produced, Serialized, TimeWindows}
+import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
+import org.apache.kafka.streams.kstream.TimeWindows
+import org.apache.kafka.streams.scala.kstream._
+import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, ByteArrayWindowStore, StreamsBuilder}
 import org.apache.kafka.streams.state.HostInfo
-import org.apache.kafka.streams.{Consumed, KafkaStreams, StreamsConfig}
+import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import utils.PathHelper
+import versatile.kafka.iq.http.{HttpRequester, KeyValueFetcher}
+import versatile.kafka.iq.services.{LocalStateStoreQuery, MetadataService}
 
 import scala.concurrent.ExecutionContext
 
-object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
+object StationStateProcessor extends InteractiveQueryWorkflow {
 
   final val ACCESS_STATION_STATE = "access-station-state"
-  final val AVAILABILITY_STATE = "availability-state"
 
-  import versatile.utils.CirceHelper._
+  implicit val _stringSerde: Serde[String] = Serdes.String()
+  implicit val _stringSerializer: Serializer[String] = Serdes.String().serializer()
+
+  import versatile.json.CirceHelper._
 
   def main(args: Array[String]): Unit = workflow()
 
@@ -56,8 +59,6 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
     // http service for request handling
     val httpRequester = new HttpRequester(system, materializer, executionContext)
 
-    implicit val ss = stringSerializer
-
     val fetcher = new StateFetcher(
       new KeyValueFetcher[String, String](metadataService, localStateStoreQuery, httpRequester, streams, executionContext, hostInfo)
     )
@@ -71,44 +72,47 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
     restService
   }
 
-  def createStationStateSummary(stationRecord: KStreamS[String, String])(implicit builder: StreamsBuilderS) = {
+  def createStationStateSummary(stationRecord: KStream[String, String]) = {
+
+    implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
+
+    val materialized: Materialized[String, String, ByteArrayKeyValueStore] =
+      Materialized.as(ACCESS_STATION_STATE)
+        .withKeySerde(_stringSerde)
+        .withValueSerde(_stringSerde)
 
     val groupedStream = stationRecord.flatMapValues(parse(_).getRight.as[Station].right.toOption)
-      .groupByKey(Serialized.`with`(stringSerde, Serde.STATION_SERDE))
+      .groupByKey
 
     /* ACCESS_STATION_STATE */
     groupedStream
-      .aggregate(
-        () => Station.empty.asJson.noSpaces,
-        StateAggregators.foldStationState,
-        Materialized.as(ACCESS_STATION_STATE)
-          .withKeySerde(stringSerde)
-          .withValueSerde(stringSerde)
-      ).toStream.to("State")(Produced.`with`(stringSerde, stringSerde))
+      .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
+      .toStream.to("State")(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
-  def createStationStateWindow(stationRecord: KStreamS[String, String], window: Long, materialized: String, topic: String)(implicit builder: StreamsBuilderS) = {
+  def createStationStateWindow(stationRecord: KStream[String, String], window: Duration, stateStoreName: String, topic: String) = {
+
+    implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
+    val materialized: Materialized[String, String, ByteArrayWindowStore] =
+      Materialized.as(stateStoreName)
+        .withKeySerde(_stringSerde)
+        .withValueSerde(_stringSerde)
 
     val groupedStream = stationRecord.flatMapValues(parse(_).getRight.as[Station].right.toOption)
-      .groupByKey(Serialized.`with`(stringSerde, Serde.STATION_SERDE))
+      .groupByKey
 
     /* WINDOW_STATION_STATE */
     groupedStream
       .windowedBy(TimeWindows.of(window))
-      .aggregate(
-        () => Station.empty.asJson.noSpaces,
-        StateAggregators.foldStationState,
-        Materialized.as(materialized)
-          .withKeySerde(stringSerde)
-          .withValueSerde(stringSerde)
-      ).toStream.to(topic)(Produced.`with`(windowedStringSerde, stringSerde))
+      .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
+      .toStream.map{case (k,v) => k.toString -> v}.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
   override def createStreams(): KafkaStreams = {
     // Kafka stream configuration
-    val streamingConfig = {
+    val streamingConfig: Properties = {
       val streamsConfiguration = new Properties()
       streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, s"state-${scala.util.Random.nextInt(100)}")
       streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "station-state")
@@ -133,19 +137,20 @@ object StationStateProcessor extends Serializers with InteractiveQueryWorkflow {
       streamsConfiguration
     }
 
-    implicit val builder: StreamsBuilderS = new StreamsBuilderS
 
-    val stations: KStreamS[String, String] = builder.stream(config.kafka.station_topic)(Consumed.`with`(stringSerde, stringSerde))
+    val builder: StreamsBuilder = new org.apache.kafka.streams.scala.StreamsBuilder()
+
+    val stations: KStream[String, String] = builder.stream(config.kafka.station_topic)(Consumed.`with`(Serdes.String(), Serdes.String()))
 
     import WindowInterval._
     createStationStateSummary(stations)
-    createStationStateWindow(stations, 60000 * 5, WINDOW_STATION_STATE_5min, "Window5min")
-    createStationStateWindow(stations, 60000 * 15, WINDOW_STATION_STATE_15min, "Window15min")
-    createStationStateWindow(stations, 60000 * 30, WINDOW_STATION_STATE_30min, "Window30min")
-    createStationStateWindow(stations, 60000 * 60, WINDOW_STATION_STATE_1h, "Window1h")
-    createStationStateWindow(stations, 60000 * 60 * 3, WINDOW_STATION_STATE_3h, "Window3h")
-    createStationStateWindow(stations, 60000 * 60 * 12, WINDOW_STATION_STATE_12h, "Window12h")
-    createStationStateWindow(stations, 60000 * 60 * 24, WINDOW_STATION_STATE_1j, "Window1j")
+    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, "Window5min")
+    createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, "Window15min")
+    createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, "Window30min")
+    createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, "Window1h")
+    createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, "Window3h")
+    createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, "Window12h")
+    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, "Window1j")
 
 
     new KafkaStreams(builder.build(), streamingConfig)

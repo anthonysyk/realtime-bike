@@ -4,7 +4,7 @@ import io.circe.parser._
 import io.circe.syntax._
 import models.{Station, StationState}
 import utils.date.DateHelper
-import versatile.utils.CirceHelper._
+import versatile.json.CirceHelper._
 
 object StateAggregators {
 

@@ -1,5 +1,5 @@
 # Using an Alpine Linux based JDK image
-FROM anapsix/alpine-java:8u131b11_jdk
+FROM anapsix/alpine-java:8u181b13_jdk
 
 COPY . /home/processor
 

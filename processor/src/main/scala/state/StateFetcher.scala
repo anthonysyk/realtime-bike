@@ -1,6 +1,5 @@
 package state
 
-import com.lightbend.kafka.scala.iq.http.KeyValueFetcher
 import enums.WindowInterval
 import io.circe.Json
 import io.circe.generic.auto._
@@ -8,10 +7,10 @@ import io.circe.parser._
 import io.circe.syntax._
 import models.{Station, StationReferential}
 import utils.date.{ChartDateHelper, DateHelper}
-import versatile.utils.CirceHelper._
+import versatile.json.CirceHelper._
+import versatile.kafka.iq.http.KeyValueFetcher
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 
 class StateFetcher(kvf: KeyValueFetcher[String, String]) {

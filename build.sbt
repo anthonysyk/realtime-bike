@@ -4,10 +4,15 @@ version := "0.1"
 
 scalaVersion := "2.11.8"
 
+organization := "org.versatile-flow"
+
+
 import Common.dependencies
 
+resolvers += "confluent" at "https://packages.confluent.io/maven/"
+
 lazy val commonDependencies = Seq(
-  dependencies.versatile, dependencies.minitest, dependencies.minitestLaws
+  dependencies.versatile
 ) ++ dependencies.kafka_all ++ dependencies.akka_all ++ dependencies.circe
 
 lazy val kafkaStreamTestDependencies = Seq(
@@ -24,6 +29,12 @@ testFrameworks += new TestFramework("minitest.runner.Framework")
 
 scalacOptions := Seq("-Xexperimental", "-unchecked", "-deprecation")
 
+val commonSettings = Seq(
+  scalaVersion := "2.11.8",
+  packJarNameConvention := "full",
+//  packExpandedClasspath := false,
+  packGenerateWindowsBatFile := false
+)
 
 
 lazy val global = project
@@ -35,19 +46,18 @@ lazy val global = project
   )
 
 lazy val common = project
+  .settings(commonSettings)
   .settings(
     name := "common",
-    libraryDependencies ++= commonDependencies,
-    scalaVersion := "2.11.8"
+    libraryDependencies ++= commonDependencies
   )
 
 lazy val collector = project
   .enablePlugins(PackPlugin)
+  .settings(commonSettings)
   .settings(
     name := "collector",
     libraryDependencies ++= commonDependencies,
-    scalaVersion := "2.11.8",
-    packGenerateWindowsBatFile := false,
     packMain := Map("run-collector" -> "webservice.StationCollector"),
     packResourceDir := Map(
       baseDirectory.value / "Dockerfile" -> "Dockerfile",
@@ -60,12 +70,11 @@ lazy val collector = project
 
 lazy val processor = project
   .enablePlugins(PackPlugin)
+  .settings(commonSettings)
   .settings(
     name := "processor",
-    libraryDependencies ++= commonDependencies ++ kafkaStreamTestDependencies,
-    scalaVersion := "2.11.8",
+    libraryDependencies ++= commonDependencies,
     testFrameworks += new TestFramework("minitest.runner.Framework"),
-    packGenerateWindowsBatFile := false,
     packMain := Map("run-processor" -> "state.StationStateProcessor"),
     packResourceDir := Map(
       baseDirectory.value / "Dockerfile" -> "Dockerfile",
@@ -78,11 +87,10 @@ lazy val processor = project
 
 lazy val analyzer = project
   .enablePlugins(PackPlugin)
+  .settings(commonSettings)
   .settings(
     name := "analyzer",
     libraryDependencies ++= commonDependencies ++ sparkDependencies,
-    scalaVersion := "2.11.8",
-    packGenerateWindowsBatFile := false,
     packMain := Map("run-analyzer" -> ""),
     packResourceDir := Map(
       baseDirectory.value / "Dockerfile" -> "Dockerfile",
