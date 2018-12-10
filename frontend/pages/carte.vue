@@ -19,6 +19,8 @@
 
 <script>
 import CarteComponent from "~/components/carte/Carte.vue"
+import Loader from "~/components/Loader.vue"
+
 import { createNamespacedHelpers } from "vuex"
 import centers from "~/resources/centers.json"
 
@@ -26,11 +28,13 @@ const { mapGetters, mapActions } = createNamespacedHelpers("carte")
 
 export default {
   components: {
-    CarteComponent
+    CarteComponent,
+    Loader
   },
   data: () => ({
     centers: centers,
     selected: centers.default,
+    loader: true,
     items: [
       {
         text: "Paris",

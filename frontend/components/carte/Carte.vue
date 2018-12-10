@@ -1,53 +1,49 @@
 <template>
-  <div class="map">
-    <vl-map ref="map" :load-tiles-while-animating="true"
-            :load-tiles-while-interacting="true" data-projection="EPSG:4326"
-            style="height: 70vh" @click="clickCoordinate = $event.coordinate"
-            @pointermove="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
-      <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
-      <vl-geoloc>
-        <template slot-scope="geoloc">
-          <vl-feature v-if="geoloc.position" id="position-feature">
-            <vl-geom-point :coordinates="geoloc.position"/>
+  <div>
+    <div class="map">
+      <vl-map ref="map" :load-tiles-while-animating="true"
+              :load-tiles-while-interacting="true" data-projection="EPSG:4326"
+              style="height: 70vh" @click="clickCoordinate = $event.coordinate"
+              @pointermove="clickCoordinate = $event.coordinate" @movestart="enableLoader" @moveend="onMapPostCompose">
+        <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
+        <vl-geoloc>
+          <template slot-scope="geoloc">
+            <vl-feature v-if="geoloc.position" id="position-feature">
+              <vl-geom-point :coordinates="geoloc.position"/>
+              <vl-style-box>
+                <vl-style-icon :scale="0.4" :anchor="[0.5, 1]" src="_media/marker.png"/>
+              </vl-style-box>
+            </vl-feature>
+          </template>
+        </vl-geoloc>
+
+        <loader :loader="loader"/>
+        <vl-layer-tile id="osm">
+          <vl-source-osm/>
+        </vl-layer-tile>
+
+        <!-- selected feature popup -->
+        <div v-for="station in getStations()" :key="`overlay-${station.number}`">
+          <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position"
+                      :positioning="positionning" class="overlay-content">
+            <template slot-scope="scope">
+              <station-info-component :station="station"/>
+            </template>
+          </vl-overlay>
+
+          <!--CIRCLES-->
+          <vl-feature>
+            <vl-geom-circle :coordinates="station.position" :radius="60"/>
             <vl-style-box>
-              <vl-style-icon :scale="0.4" :anchor="[0.5, 1]" src="_media/marker.png"/>
+              <vl-style-stroke :color="getStationColor(station.status)"/>
+              <vl-style-fill :color="getStationColor(station.status)"/>
             </vl-style-box>
           </vl-feature>
-        </template>
-      </vl-geoloc>
-
-      <vl-layer-tile id="osm">
-        <vl-source-osm/>
-      </vl-layer-tile>
-
-      <!-- selected feature popup -->
-      <div v-for="station in getStations()" :key="`overlay-${station.number}`">
-        <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position"
-                    :positioning="positionning" class="overlay-content">
-          <template slot-scope="scope">
-            <station-info-component :station="station"/>
-          </template>
-        </vl-overlay>
-
-        <!--CIRCLES-->
-        <vl-feature>
-          <vl-geom-circle :coordinates="station.position" :radius="60"/>
-          <vl-style-box>
-            <vl-style-stroke :color="getStationColor(station.status)"/>
-            <vl-style-fill :color="getStationColor(station.status)"/>
-          </vl-style-box>
-        </vl-feature>
         <!--CIRCLES-->
 
-      </div>
+        </div>
       <!--// selected popup -->
-    </vl-map>
-    <div style="padding: 20px">
-      Zoom: {{ value.zoom }}<br>
-      Center: {{ value.center }}<br>
-      Rotation: {{ value.rotation }}<br>
-      Click: {{ clickCoordinate }}<br>
-      Stations: {{ getStations().length }}<br>
+      </vl-map>
     </div>
   </div>
 </template>
@@ -56,9 +52,10 @@
 import { transformExtent } from "vuelayers/lib/_esm/ol-ext"
 import { OVERLAY_POSITIONING } from "vuelayers/lib/_esm/ol-ext/consts"
 import StationInfoComponent from "./StationInfoComponent"
+import Loader from "~/components/Loader.vue"
 
 export default {
-  components: { StationInfoComponent },
+  components: { StationInfoComponent, Loader },
   props: {
     value: {
       type: Object,
@@ -82,7 +79,13 @@ export default {
       selectedStation: {},
       corners: {},
       currExtent: [],
-      hasMap: false
+      hasMap: false,
+      loader: false
+    }
+  },
+  watch: {
+    stations: function(val, oldval) {
+      if (oldval !== val) this.loader = false
     }
   },
   methods: {
@@ -130,10 +133,6 @@ export default {
         isInside(yClick, yStation)
       )
     },
-    isLoaded() {
-      // console.log(this.stations)
-      // console.log("STATIONS ARE LOADED ! YAAAY")
-    },
     getStationColor(status) {
       return status === "CLOSED" ? "red" : "#3399cc"
     },
@@ -157,10 +156,6 @@ export default {
         coordinates
       })
 
-      console.log({
-        coordinates
-      })
-
       this.corners = coordinates
     },
     isInsideMap(station) {
@@ -172,6 +167,11 @@ export default {
       const xIsInside = xStation > topLeft && xStation < bottomRight
       const yIsInside = yStation > bottomLeft && yStation < topRight
       return xIsInside && yIsInside
+    },
+    enableLoader() {
+      this.value.city === null ? (this.loader = false) : (this.loader = true)
+
+      console.log(this)
     }
   }
 }

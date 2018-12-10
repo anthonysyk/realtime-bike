@@ -23,7 +23,7 @@
       <div v-for="station in getStations()" :key="`overlay-${station.number}`">
         <vl-overlay v-if="isStationClicked(station)" id="overlay" :position="station.position" :positioning="positionning" class="overlay-content">
           <template slot-scope="scope">
-            <station-info-component :station="station" @updateStation="$emit('updateStation', station)"/>
+            <station-info-component :station="station" @updateStationEvent="$emit('updateStationEvent', station)"/>
           </template>
         </vl-overlay>
 
@@ -73,11 +73,14 @@ export default {
       selectedStation: {},
       corners: {},
       currExtent: [],
-      hasMap: false
+      hasMap: false,
+      loader: false
     }
   },
-  nextTick: function() {
-    console.log("tic")
+  watch: {
+    stations: function(val, oldval) {
+      if (oldval !== val) this.loader = false
+    }
   },
   methods: {
     getStations() {
