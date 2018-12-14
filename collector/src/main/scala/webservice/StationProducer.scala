@@ -1,6 +1,5 @@
 package webservice
 
-import com.sksamuel.avro4s.RecordFormat
 import config.AppConfig
 import models.Station
 import org.apache.avro.generic.GenericRecord
@@ -19,9 +18,7 @@ class StationProducer(config: AppConfig) extends KafkaProducerHelper with Statio
   override lazy val logsTopic: String = config.kafka.station_logs_topic
   override lazy val bootstrapServer: String = config.kafka.bootstrap_server
 
-  val format: RecordFormat[Station] = RecordFormat[Station]
-
-  private def createStationRecord(station: Station) = new ProducerRecord[String, GenericRecord](topic, station.externalId, format.to(station))
+  private def createStationRecord(station: Station) = new ProducerRecord[String, GenericRecord](topic, station.externalId, Station.avroFormat.to(station))
 
   override def sendStationsStatus(stations: Seq[Station]): Unit = {
     val records: Seq[ProducerRecord[String, GenericRecord]] = stations.map(createStationRecord)

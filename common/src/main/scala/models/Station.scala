@@ -1,5 +1,6 @@
 package models
 
+import com.sksamuel.avro4s.RecordFormat
 import io.circe.syntax._
 import utils.{PathHelper, Writer}
 
@@ -34,6 +35,8 @@ object Station {
   implicit val encoderPosition: Encoder[Position] = deriveEncoder[Position]
   implicit val decoderStationState: Decoder[StationState] = deriveDecoder[StationState]
   implicit val encoderStationState: Encoder[StationState] = deriveEncoder[StationState]
+
+  val avroFormat: RecordFormat[Station] = RecordFormat[Station]
 
   def fromStationListJson(string: String): Seq[Either[Error, Station]] = {
     parse(string).getRight.asArray.getOrElse(Nil).map(_.as[Station])

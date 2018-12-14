@@ -10,7 +10,9 @@ import enums.WindowInterval
 import http.{InteractiveQueryWorkflow, MyHTTPService}
 import io.circe.parser._
 import io.circe.syntax._
+import io.confluent.kafka.streams.serdes.avro.{GenericAvroDeserializer, GenericAvroSerializer}
 import models.{CustomSerde, Station}
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
 import org.apache.kafka.streams.kstream.TimeWindows
@@ -23,6 +25,7 @@ import versatile.kafka.iq.http.{HttpRequester, KeyValueFetcher}
 import versatile.kafka.iq.services.{LocalStateStoreQuery, MetadataService}
 
 import scala.concurrent.ExecutionContext
+import versatile.json.CirceHelper._
 
 object StationStateProcessor extends InteractiveQueryWorkflow {
 
@@ -31,14 +34,12 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
   implicit val _stringSerde: Serde[String] = Serdes.String()
   implicit val _stringSerializer: Serializer[String] = Serdes.String().serializer()
 
-  import versatile.json.CirceHelper._
-
   def main(args: Array[String]): Unit = workflow()
 
   override def startRestProxy(streams: KafkaStreams, hostInfo: HostInfo,
                               actorSystem: ActorSystem, materializer: ActorMaterializer): MyHTTPService = {
 
-    implicit val system = actorSystem
+    implicit val system: ActorSystem = actorSystem
 
     lazy val defaultParallelism: Int = {
       val rt = Runtime.getRuntime
@@ -72,7 +73,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     restService
   }
 
-  def createStationStateSummary(stationRecord: KStream[String, String]) = {
+  def createStationStateSummary(stationRecord: KStream[String, Station]) = {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
 
@@ -81,8 +82,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         .withKeySerde(_stringSerde)
         .withValueSerde(_stringSerde)
 
-    val groupedStream = stationRecord.flatMapValues(parse(_).getRight.as[Station].right.toOption)
-      .groupByKey
+    val groupedStream = stationRecord.groupByKey
 
     /* ACCESS_STATION_STATE */
     groupedStream
@@ -91,7 +91,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
   }
 
-  def createStationStateWindow(stationRecord: KStream[String, String], window: Duration, stateStoreName: String, topic: String) = {
+  def createStationStateWindow(stationRecord: KStream[String, Station], window: Duration, stateStoreName: String, topic: String) = {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
     val materialized: Materialized[String, String, ByteArrayWindowStore] =
@@ -99,8 +99,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         .withKeySerde(_stringSerde)
         .withValueSerde(_stringSerde)
 
-    val groupedStream = stationRecord.flatMapValues(parse(_).getRight.as[Station].right.toOption)
-      .groupByKey
+    val groupedStream = stationRecord.groupByKey
 
     /* WINDOW_STATION_STATE */
     groupedStream
@@ -140,7 +139,10 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     val builder: StreamsBuilder = new org.apache.kafka.streams.scala.StreamsBuilder()
 
-    val stations: KStream[String, String] = builder.stream(config.kafka.station_topic)(Consumed.`with`(Serdes.String(), Serdes.String()))
+    implicit def stringSerde: Serde[String] = Serdes.String()
+
+    val stations = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
+      .map((k, v) => k -> Station.avroFormat.from(v))
 
     import WindowInterval._
     createStationStateSummary(stations)
