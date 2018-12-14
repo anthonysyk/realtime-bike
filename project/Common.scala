@@ -10,9 +10,9 @@ object Common {
       val minitestLaws = "io.monix" %% "minitest-laws" % MinitestVersion % "test"
 
       val kafka_all = Seq(
-//        "org.apache.kafka" % "kafka_2.11" % kafkaV excludeAll(ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("org.apache.zookeeper",
-//          "zookeeper")),
-        "org.apache.kafka" %% "kafka-streams-scala" % "2.1.0" excludeAll(ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("kafka-client", "bam"))
+        "org.apache.kafka" %% "kafka-streams-scala" % "2.1.0" excludeAll(ExclusionRule("org.slf4j", "slf4j-log4j12"), ExclusionRule("kafka-client", "bam")),
+        "com.sksamuel.avro4s" %% "avro4s-core" % "2.0.2",
+        "io.confluent" % "kafka-streams-avro-serde" % "5.0.0"
       )
 
       val akka_all = Seq(

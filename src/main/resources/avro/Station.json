@@ -1,0 +1,80 @@
+{
+  "type" : "record",
+  "name" : "Station",
+  "namespace" : "models",
+  "fields" : [ {
+    "name" : "number",
+    "type" : "int"
+  }, {
+    "name" : "name",
+    "type" : "string"
+  }, {
+    "name" : "address",
+    "type" : "string"
+  }, {
+    "name" : "position",
+    "type" : {
+      "type" : "record",
+      "name" : "Position",
+      "fields" : [ {
+        "name" : "lat",
+        "type" : "double"
+      }, {
+        "name" : "lng",
+        "type" : "double"
+      } ]
+    }
+  }, {
+    "name" : "banking",
+    "type" : "boolean"
+  }, {
+    "name" : "bonus",
+    "type" : "boolean"
+  }, {
+    "name" : "status",
+    "type" : "string"
+  }, {
+    "name" : "contract_name",
+    "type" : "string"
+  }, {
+    "name" : "bike_stands",
+    "type" : "int"
+  }, {
+    "name" : "available_bike_stands",
+    "type" : "int"
+  }, {
+    "name" : "available_bikes",
+    "type" : "int"
+  }, {
+    "name" : "last_update",
+    "type" : "long"
+  }, {
+    "name" : "state",
+    "type" : [ "null", {
+      "type" : "record",
+      "name" : "StationState",
+      "fields" : [ {
+        "name" : "start_date",
+        "type" : "string"
+      }, {
+        "name" : "last_update",
+        "type" : "string"
+      }, {
+        "name" : "bikes_taken",
+        "type" : "int"
+      }, {
+        "name" : "bikes_droped",
+        "type" : "int"
+      }, {
+        "name" : "availability",
+        "type" : "double"
+      }, {
+        "name" : "counter",
+        "type" : "int"
+      }, {
+        "name" : "counterStateChanged",
+        "type" : "int"
+      } ]
+    } ]
+  } ]
+}

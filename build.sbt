@@ -9,10 +9,10 @@ organization := "org.versatile-flow"
 
 import Common.dependencies
 
-resolvers += "confluent" at "https://packages.confluent.io/maven/"
+resolvers += "confluent.io" at "http://packages.confluent.io/maven/"
 
 lazy val commonDependencies = Seq(
-  dependencies.versatile
+  dependencies.versatile, dependencies.minitest, dependencies.minitestLaws
 ) ++ dependencies.kafka_all ++ dependencies.akka_all ++ dependencies.circe
 
 lazy val kafkaStreamTestDependencies = Seq(
