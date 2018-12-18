@@ -170,8 +170,6 @@ export default {
     },
     enableLoader() {
       this.value.city === null ? (this.loader = false) : (this.loader = true)
-
-      console.log(this)
     }
   }
 }

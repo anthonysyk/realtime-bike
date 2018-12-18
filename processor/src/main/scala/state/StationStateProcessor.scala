@@ -79,7 +79,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         .withKeySerde(_stringSerde)
         .withValueSerde(_stringSerde)
 
-    stationRecord.groupByKey.aggregate(Station.empty.asJson.noSpaces)({ (_,_, curr) => curr.asJson.noSpaces})(materialized)
+    stationRecord.groupByKey.aggregate(Station.empty.asJson.noSpaces)({ (_, _, curr) => curr.asJson.noSpaces })(materialized)
 
   }
 
@@ -115,7 +115,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     groupedStream
       .windowedBy(TimeWindows.of(window))
       .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
-      .toStream.map{case (k,v) => k.toString -> v}.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
+      .toStream.map { case (k, v) => k.toString -> v }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
@@ -152,7 +152,10 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     implicit def stringSerde: Serde[String] = Serdes.String()
 
     val stations = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
-      .map((k, v) => k -> Station.avroFormat.from(v))
+      .map { (_, v) =>
+        val station = Station.avroFormat.from(v)
+        station.externalId -> station
+      }
 
     import WindowInterval._
     createStationStateSummary(stations)
