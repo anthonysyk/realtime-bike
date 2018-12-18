@@ -13,6 +13,12 @@ sed -i -e "s/^rpc_address.*/rpc_address: 0.0.0.0/" $CASSANDRA_CONFIG/cassandra.y
 # Be your own seed
 sed -i -e "s/- seeds: \"127.0.0.1\"/- seeds: \"$SEEDS\"/" $CASSANDRA_CONFIG/cassandra.yaml
 
+# Set authenticator to Password
+sed -i -e "s/authenticator: AllowAllAuthenticator/authenticator: PasswordAuthenticator/" $CASSANDRA_CONFIG/cassandra.yaml
+
+# Disable cache retention
+sed -i -e "s/roles_validity_in_ms: 2000/roles_validity_in_ms: 0/" $CASSANDRA_CONFIG/cassandra.yaml
+
 # Disable gossip, no need in one node cluster
 echo "JVM_OPTS=\"\$JVM_OPTS -Dcassandra.skip_wait_for_gossip_to_settle=0\"" >> $CASSANDRA_CONFIG/cassandra-env.sh
 

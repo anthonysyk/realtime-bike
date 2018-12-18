@@ -37,7 +37,6 @@ object StateAggregators {
         availability = availability,
         counter = counter,
         counterStateChanged = counterStateChanged
-
       ))
     ).asJson.noSpaces
   }

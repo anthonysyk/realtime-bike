@@ -8,9 +8,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import enums.WindowInterval
 import http.{InteractiveQueryWorkflow, MyHTTPService}
-import io.circe.parser._
 import io.circe.syntax._
-import io.confluent.kafka.streams.serdes.avro.{GenericAvroDeserializer, GenericAvroSerializer}
 import models.{CustomSerde, Station}
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -25,7 +23,6 @@ import versatile.kafka.iq.http.{HttpRequester, KeyValueFetcher}
 import versatile.kafka.iq.services.{LocalStateStoreQuery, MetadataService}
 
 import scala.concurrent.ExecutionContext
-import versatile.json.CirceHelper._
 
 object StationStateProcessor extends InteractiveQueryWorkflow {
 
@@ -73,6 +70,19 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     restService
   }
 
+  def createLastStateKTable(stationRecord: KStream[String, Station]): KTable[String, String] = {
+
+    implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
+
+    val materialized: Materialized[String, String, ByteArrayKeyValueStore] =
+      Materialized.as(ACCESS_STATION_STATE)
+        .withKeySerde(_stringSerde)
+        .withValueSerde(_stringSerde)
+
+    stationRecord.groupByKey.aggregate(Station.empty.asJson.noSpaces)({ (_,_, curr) => curr.asJson.noSpaces})(materialized)
+
+  }
+
   def createStationStateSummary(stationRecord: KStream[String, Station]) = {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
@@ -87,7 +97,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     /* ACCESS_STATION_STATE */
     groupedStream
       .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
-      .toStream.to("State")(Produced.`with`(_stringSerde, _stringSerde))
+      .toStream.to(config.kafka.station_state_topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
@@ -146,13 +156,13 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     import WindowInterval._
     createStationStateSummary(stations)
-    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, "Window5min")
-    createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, "Window15min")
-    createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, "Window30min")
-    createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, "Window1h")
-    createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, "Window3h")
-    createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, "Window12h")
-    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, "Window1j")
+    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, WINDOW_STATION_TOPIC_5min)
+    createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, WINDOW_STATION_TOPIC_15min)
+    createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, WINDOW_STATION_TOPIC_30min)
+    createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)
+    createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, WINDOW_STATION_TOPIC_3h)
+    createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, WINDOW_STATION_TOPIC_12h)
+    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
 
 
     new KafkaStreams(builder.build(), streamingConfig)

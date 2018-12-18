@@ -1,0 +1,19 @@
+{
+  "name" : "cassandra-sink-station-raw",
+  "config" : {
+    "connector.class" : "io.confluent.connect.cassandra.CassandraSinkConnector",
+    "tasks.max" : "1",
+    "topics" : "station_raw_topic",
+    "cassandra.contact.points" : "localhost",
+    "cassandra.keyspace" : "test",
+    "cassandra.write.mode": "Insert",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url":"http://localhost:8081",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url":"http://localhost:8081",
+    "cassandra.table.manage.enabled": "false",
+    "cassandra.consistency.level": "LOCAL_ONE",
+    "cassandra.password":"versatile75!",
+    "cassandra.username":"versatile"
+  }
+}

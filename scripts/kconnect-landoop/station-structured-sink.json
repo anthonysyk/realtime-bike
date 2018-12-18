@@ -1,0 +1,18 @@
+{
+  "name": "cassandra-sink-station-structured",
+  "config": {
+    "connector.class": "com.datamountaineer.streamreactor.connect.cassandra.sink.CassandraSinkConnector",
+    "tasks.max": 1,
+    "topics": "station_structured",
+    "connect.cassandra.kcql": "INSERT INTO station_structured_topic SELECT * FROM station_structured",
+    "connect.cassandra.port": 9042,
+    "connect.cassandra.key.space": "rtbike",
+    "connect.cassandra.contact.points": "localhost",
+    "connect.cassandra.username": "versatile",
+    "connect.cassandra.password": "versatile75!",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url":"http://localhost:8081",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url":"http://localhost:8081"
+  }
+}

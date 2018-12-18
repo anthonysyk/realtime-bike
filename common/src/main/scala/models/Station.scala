@@ -1,8 +1,25 @@
 package models
 
 import com.sksamuel.avro4s.RecordFormat
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
 import utils.{PathHelper, Writer}
+
+case class StationKey(
+                       contract_name: String,
+                       number: Int,
+                       last_update: Long
+                     ) {
+  lazy val externalId = s"${number}_$contract_name"
+}
+
+object StationKey {
+  implicit val decoderStationKey: Decoder[StationKey] = deriveDecoder[StationKey]
+  implicit val encoderStationKey: Encoder[StationKey] = deriveEncoder[StationKey]
+
+  val avroFormat: RecordFormat[StationKey] = RecordFormat[StationKey]
+}
 
 case class Station(
                     number: Int,
@@ -20,6 +37,7 @@ case class Station(
                     state: Option[StationState]
                   ) {
   lazy val externalId = s"${number}_$contract_name"
+  lazy val key = StationKey(contract_name, number, last_update)
 }
 
 object Station {
@@ -72,6 +90,8 @@ case class StationState(
                        )
 
 object StationState {
+
+  implicit val format: RecordFormat[StationState] = RecordFormat[StationState]
 
   def getAvailability(used: Int, total: Int): Double = if (used != 0 && (total % used) != 0) {
     100 - (100 / (total.toDouble / used.toDouble))

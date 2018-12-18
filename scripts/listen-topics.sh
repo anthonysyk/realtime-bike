@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export PATH="$PATH:/opt/confluent-5.0.0/bin"
+export PATH="$PATH:/opt/confluent/bin"
 
 TOPIC=$1
 

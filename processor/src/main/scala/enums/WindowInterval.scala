@@ -13,6 +13,14 @@ object WindowInterval extends Enumeration {
   final val WINDOW_STATION_STATE_12h = createNamespace("12h")
   final val WINDOW_STATION_STATE_1j = createNamespace("1j")
 
+  final val WINDOW_STATION_TOPIC_5min = createTopicName("5min")
+  final val WINDOW_STATION_TOPIC_15min = createTopicName("15min")
+  final val WINDOW_STATION_TOPIC_30min = createTopicName("30min")
+  final val WINDOW_STATION_TOPIC_1h = createTopicName("1h")
+  final val WINDOW_STATION_TOPIC_3h = createTopicName("3h")
+  final val WINDOW_STATION_TOPIC_12h = createTopicName("12h")
+  final val WINDOW_STATION_TOPIC_1j = createTopicName("1j")
+
 
   def validateInterval(interval: String): Boolean = this.values.map(_.toString).contains(interval)
 
@@ -27,6 +35,11 @@ object WindowInterval extends Enumeration {
       "window-station-state-",
       interval
     ).mkString ("-")
+  }
+
+  def createTopicName(interval: String): String = {
+    assert(validateInterval(interval))
+    s"window_$interval"
   }
 
 }

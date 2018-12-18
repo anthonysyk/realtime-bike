@@ -14,7 +14,8 @@ case class ApiConf(
 
 case class KafkaConf(
                       station_topic: String,
-                      station_logs_topic: String,
+                      station_raw_topic: String,
+                      station_structured_topic: String,
                       bootstrap_server: String
                     )
 
@@ -32,7 +33,8 @@ object AppConfig {
     ),
     KafkaConf(
       kafkaConf.getString("station_topic"),
-      kafkaConf.getString("station_logs_topic"),
+      kafkaConf.getString("station_raw_topic"),
+      kafkaConf.getString("station_structured_topic"),
       kafkaConf.getString("bootstrap_server")
     )
   )
