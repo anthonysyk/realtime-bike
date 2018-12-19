@@ -33,7 +33,7 @@ export default {
   },
   data: () => ({
     centers: centers,
-    selected: centers.default,
+    selected: centers.paris,
     loader: true,
     items: [
       {

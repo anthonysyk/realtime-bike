@@ -1,19 +1,23 @@
 <template>
   <div
     v-if="loader"
+    :class="{ 'clickable' : clickable}"
     class="loader"
   >
     <v-progress-circular
       indeterminate
       color="white"
-      class="mb-0 progress-circle"
-    />
+      class="mb-0 progress-circle"/>
   </div>
 </template>
 
 <script>
 export default {
   props: {
+    clickable: {
+      type: Boolean,
+      default: () => false
+    },
     loader: {
       type: Boolean,
       default: () => true
@@ -33,6 +37,10 @@ export default {
   z-index: 10;
   width: 100%;
   background-color: #ababab6b !important;
+}
+
+.clickable {
+  pointer-events: none;
 }
 
 .progress-circle {

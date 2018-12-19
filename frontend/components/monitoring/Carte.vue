@@ -15,8 +15,8 @@
         </template>
       </vl-geoloc>
 
-      <vl-layer-tile id="osm">
-        <vl-source-osm/>
+      <vl-layer-tile id="bingmaps">
+        <vl-source-bing-maps :api-key="apiKey" :imagery-set="imagerySet"/>
       </vl-layer-tile>
 
       <!-- selected feature popup -->
@@ -64,6 +64,9 @@ export default {
   },
   data() {
     return {
+      apiKey:
+        "Anb1dy0vZfx5t6afKqjCGe8iwGcTabo1r9AuJZt1OX3oMpawO0eR0Ef1Yk1NYmyL",
+      imagerySet: "Road",
       positionning: OVERLAY_POSITIONING.CENTER_CENTER,
       zoom: 2,
       center: [0, 0],
