@@ -49,14 +49,27 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: ["@/plugins/vuetify", "@/plugins/vuelayers.js"],
-
   /*
   ** Nuxt.js modules
   */
   modules: [
     // Doc: https://github.com/nuxt-community/axios-module#usage
     "@nuxtjs/axios",
-    "@nuxtjs/proxy"
+    "@nuxtjs/proxy",
+    [
+      "@nuxtjs/google-analytics",
+      {
+        id: "UA-115881480-2",
+        autoTracking: {
+          page: true, //!isDev
+          exception: true
+        },
+        debug: {
+          enabled: isDev,
+          sendHitTask: !isDev
+        }
+      }
+    ]
   ],
   /*
   ** Axios module configuration

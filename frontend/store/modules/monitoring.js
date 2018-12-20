@@ -1,3 +1,5 @@
+import { event } from "vue-analytics"
+
 const getEmptyState = () => ({
   stations: [],
   fullStations: [],
@@ -44,6 +46,8 @@ const actions = {
     commit("updateStations", stations)
   },
   async fetchStats({ commit }, { selectedInterval, selectedStation }) {
+    event("monitoring", `show-${selectedInterval}`, selectedStation.value)
+
     const stats = await this.$axios.$get(
       `kafka/station/access/win/${selectedInterval}/${selectedStation.value}`
     )
