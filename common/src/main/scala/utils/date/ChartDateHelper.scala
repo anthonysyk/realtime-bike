@@ -11,9 +11,9 @@ object ChartDateHelper {
   val date = new SimpleDateFormat("dd-MM")
   val time = new SimpleDateFormat("HH:mm")
   val datetime = new SimpleDateFormat("dd-MM HH:mm")
-  time.setTimeZone(java.util.TimeZone.getTimeZone("GMT+2"))
-  date.setTimeZone(java.util.TimeZone.getTimeZone("GMT+2"))
-  datetime.setTimeZone(java.util.TimeZone.getTimeZone("GMT+2"))
+  time.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
+  date.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
+  datetime.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
 
   def createLabel(timestamps: Seq[Long]) = {
     timestamps.foldLeft(Option.empty[String] -> Seq.empty[String]) { (leftAcc, right) =>
