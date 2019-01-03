@@ -2,9 +2,10 @@ package webservice
 
 import akka.actor.{Actor, Cancellable, Props}
 import config.AppConfig
+import io.circe.parser._
 import models.{ParisStation, Station, SummaryParisStation}
 import utils.date.DateHelper
-import webservice.TickActor.{FetchParisStationStatus, FetchStationsStatus}
+import webservice.TickActor._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -25,8 +26,8 @@ object StationCollector {
     val producer: StationProducer = new StationProducer(appConfig)
 
     akkaService.system.scheduler.schedule(5.seconds, 60.seconds) {
-      tickActor ! FetchStationsStatus(akkaService, producer)
-      tickActor ! FetchParisStationStatus(akkaService, producer)
+      tickActor ! FetchJcDecauxStations(akkaService, producer)
+      tickActor ! FetchParisStations(akkaService, producer)
     }
   }
 
@@ -41,56 +42,68 @@ class TickActor extends Actor {
   // StationName -> Summary
   var currentStateParis: Map[String, SummaryParisStation] = Map.empty[String, SummaryParisStation]
 
-  val contractsFilter = Seq("Lyon", "Marseille", "Bordeaux", "Lille", "Nantes")
+  val JCDecauxAPISource = "JCDecauxAPI"
+  val ParisVelibSource = "ParisVelib"
 
-  val JCDecauxAPI = "JCDecauxAPI"
-  val VelibParis = "VelibParis"
+  val AllStationsEventType = "all_stations"
+  val ParisEventType = "Paris"
 
-  val JCDecauxEventType = "fetch_station_jcdecaux"
-  val VelibParisEventType = "fetch_station_velib"
+  def jsonToArr(string: String): Seq[String] = {
+    parse(string).fold({
+      _.getMessage() +: Nil
+    }, {
+      _.asArray.getOrElse(Nil).map(_.noSpaces)
+    })
+  }
 
   override def receive: Receive = {
-    case FetchStationsStatus(service, producer) => service.getStationsList.andThen { case Success(response) =>
-
-      producer.sendRawResponseEvent(JCDecauxAPI, JCDecauxEventType, response.fold(identity, identity))
-
-      val maybeResponse = response.right.toOption
-      val stations: Seq[Station] = maybeResponse.map(Station.fromStationListJson).getOrElse(Nil).flatMap(_.right.toOption)
-      val filteredStations = stations.filter(station => contractsFilter.contains(station.contract_name))
-        .filterNot(station => currentStateJCDecaux.get(station.externalId).contains(station.last_update))
-
-      println(s"[${DateHelper.nowReadable}] ${filteredStations.length} stations récupérées")
-
-      // Producer write into topic
-      producer.sendStationEvents(filteredStations, JCDecauxEventType)
-
-      filteredStations.foreach { s =>
-        currentStateJCDecaux += (s.externalId -> s.last_update)
-      }
-
-    case Failure(exception) => producer.sendRawResponseEvent(JCDecauxAPI, JCDecauxEventType, exception.getMessage)
-    }
-    case FetchParisStationStatus(service, producer) => service.getParisStations.andThen {
+    case FetchJcDecauxStations(service, producer) => service.getStationsList.andThen {
       case Success(response) =>
-        producer.sendRawResponseEvent(VelibParis, VelibParisEventType, response.fold(identity, identity))
+          producer.sendRawResponseEvent(JCDecauxAPISource, response.fold(identity, identity), AllStationsEventType)
+      case Failure(error) =>
+        producer.sendRawResponseEvent(JCDecauxAPISource, error.getMessage, AllStationsEventType)
+    }.map {
+      case Right(response) =>
+        val rawStations: Seq[Station] = Station.fromStationListJson(response).flatMap(_.right.toOption)
 
-        val maybeResponse = response.right.toOption
-        val stationsWithSummary: Seq[(Station, SummaryParisStation)] = maybeResponse.map(response =>
-          ParisStation.fromStationListJson(response, currentStateParis)
-        ).getOrElse(Nil).flatMap(_.right.toOption).flatMap(_.toSeq)
+        val stationsWithoutDuplicates: Seq[Station] = rawStations
+          .filterNot(station => currentStateJCDecaux.get(station.externalId).contains(station.last_update))
+
+        val groupedStations: Map[String, Seq[Station]] = rawStations.groupBy(station => station.contract_name)
+
+        groupedStations.foreach { case (contract, stations) =>
+          println(s"[${DateHelper.nowReadable}] ${stations.length} stations récupérées pour $contract")
+        }
+        println(s"[${DateHelper.nowReadable}] ${stationsWithoutDuplicates.length} stations récupérées sur JcDecaux API\n")
+
+        groupedStations.foreach { case (contract, stations) =>
+          producer.sendStationEvents(stations, contract)
+        }
+
+        stationsWithoutDuplicates.foreach { station =>
+          currentStateJCDecaux += (station.externalId -> station.last_update)
+        }
+    }
+
+    case FetchParisStations(service, producer) => service.getParisStations.andThen {
+      case Success(response) =>
+        producer.sendRawResponseEvent(ParisVelibSource, response.fold(identity, identity), ParisEventType)
+      case Failure(exception) =>
+        producer.sendRawResponseEvent(ParisVelibSource, exception.getMessage, ParisEventType)
+    }.map {
+      case Right(response) =>
+        val stationsWithSummary: Seq[(Station, SummaryParisStation)] =
+          ParisStation.fromStationListJson(response, currentStateParis).flatMap(_.right.toOption.flatten.toSeq)
 
         println(s"[${DateHelper.nowReadable}] ${stationsWithSummary.length} stations de Paris récupérées")
 
-        // Producer write into topic
-        producer.sendStationEvents(stationsWithSummary.map(_._1), VelibParisEventType)
+        producer.sendStationEvents(stationsWithSummary.map(_._1), ParisEventType)
 
         stationsWithSummary.foreach {
           case (_, summary) => currentStateParis += (summary.stationInfo.name -> summary)
         }
-      case Failure(exception) =>
-        producer.sendRawResponseEvent(VelibParis, VelibParisEventType,exception.getMessage)
-
     }
+
   }
 }
 
@@ -98,8 +111,8 @@ object TickActor {
 
   sealed trait Message
 
-  case class FetchStationsStatus[T <: StationProducerTrait](service: BikeApiService, producer: T) extends Message
+  case class FetchJcDecauxStations[T <: StationProducerTrait](service: BikeApiService, producer: T) extends Message
 
-  case class FetchParisStationStatus[T <: StationProducerTrait](service: BikeApiService, producer: T) extends Message
+  case class FetchParisStations[T <: StationProducerTrait](service: BikeApiService, producer: T) extends Message
 
 }

@@ -56,6 +56,11 @@ object Station {
 
   val avroFormat: RecordFormat[Station] = RecordFormat[Station]
 
+  /**
+    * Converts a jcdecaux response into a collection of station
+    * @param string
+    * @return
+    */
   def fromStationListJson(string: String): Seq[Either[Error, Station]] = {
     parse(string).getRight.asArray.getOrElse(Nil).map(_.as[Station])
   }

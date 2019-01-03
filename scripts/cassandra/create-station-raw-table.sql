@@ -1,5 +1,7 @@
 CREATE TABLE rtbike.station_raw_topic(
                 year int,
+                month int,
+                day int,
                 event_timestamp bigint,
                 event_id varchar,
                 source varchar,
@@ -7,5 +9,5 @@ CREATE TABLE rtbike.station_raw_topic(
                 readable_date varchar,
                 event_raw varchar,
                 offset bigint,
-                PRIMARY KEY((year), event_timestamp, event_id))
+                PRIMARY KEY((year, source), event_timestamp, event_id))
                 WITH CLUSTERING ORDER BY (event_timestamp DESC);
