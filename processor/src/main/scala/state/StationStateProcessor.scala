@@ -165,7 +165,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)
     createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, WINDOW_STATION_TOPIC_3h)
     createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, WINDOW_STATION_TOPIC_12h)
-    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
+//    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
 
 
     new KafkaStreams(builder.build(), streamingConfig)

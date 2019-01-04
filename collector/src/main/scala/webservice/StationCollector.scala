@@ -25,7 +25,7 @@ object StationCollector {
     val tickActor = akkaService.system.actorOf(Props[TickActor], name = "tick-actor")
     val producer: StationProducer = new StationProducer(appConfig)
 
-    akkaService.system.scheduler.schedule(5.seconds, 60.seconds) {
+    akkaService.system.scheduler.schedule(5.seconds, 180.seconds) {
       tickActor ! FetchJcDecauxStations(akkaService, producer)
       tickActor ! FetchParisStations(akkaService, producer)
     }
