@@ -1,18 +1,14 @@
 <template>
-  <v-layout wrap>
-    <v-flex text-xs-center>
-      <v-flex xs12 sm6 d-flex>
-        <v-select v-model="selected"
-                  :items="items"
-                  label="Choisissez une ville"
-        />
-      </v-flex>
-      <v-flex>
-        <v-card>
-          <carte-component v-model="selected.carte" :stations="getStations"
-                           @fetchStationsEmit="fetchStationsWithCoordinatesWrapper"/>
-        </v-card>
-      </v-flex>
+  <v-layout row wrap>
+    <v-flex xs12>
+      <v-select v-model="selected"
+                :items="items"
+                label="Choisissez une ville"
+      />
+    </v-flex>
+    <v-flex sm12>
+      <carte-component v-model="selected.carte" :stations="getStations"
+                       @fetchStationsEmit="fetchStationsWithCoordinatesWrapper"/>
     </v-flex>
   </v-layout>
 </template>

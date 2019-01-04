@@ -1,8 +1,8 @@
 <template>
   <v-card class="overlay-content">
     <v-card-title primary-title>
-      <h3 :style="getStationColor(station)" >{{ station.name }}</h3><br>
-      <v-chip v-if="isStationClosed(station)" class="ml-3 pl-1" color="red" text-color="white">
+      <h3 :style="getStationColor(station)" class="text-xs-center">{{ station.name }}</h3><br>
+      <v-chip v-if="isStationClosed(station)" color="red" text-color="white" class="margin-auto">
         <v-avatar>
           <v-icon dark>remove_circle_outline</v-icon>
         </v-avatar>
@@ -40,6 +40,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+h3 {
+  width: 100%;
+  margin-bottom: 0.4rem;
+}
+
+.margin-auto {
+  margin: auto !important;
+}
+
 .grid-container {
   margin: 2rem 0 2rem 0;
   display: inline-grid;
@@ -55,7 +64,7 @@ export default {
 .overlay-content {
   padding: 5px 10px;
   font-size: 1rem;
-  border-radius: 15px;
+  border-radius: 0;
   ul {
     text-align: left;
     list-style: none;

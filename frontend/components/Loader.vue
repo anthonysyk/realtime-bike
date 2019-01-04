@@ -37,6 +37,7 @@ export default {
   z-index: 10;
   width: 100%;
   background-color: #ababab6b !important;
+  text-align: center;
 }
 
 .clickable {

@@ -1,4 +1,4 @@
-import { event } from "vue-analytics"
+// import { event } from "vue-analytics"
 
 const getEmptyState = () => ({
   stations: [],
@@ -46,11 +46,13 @@ const actions = {
     commit("updateStations", stations)
   },
   async fetchStats({ commit }, { selectedInterval, selectedStation }) {
-    event("monitoring", `show-${selectedInterval}`, selectedStation.value)
+    const url = `kafka/station/access/win/${selectedInterval}/${
+      selectedStation.value
+    }`
 
-    const stats = await this.$axios.$get(
-      `kafka/station/access/win/${selectedInterval}/${selectedStation.value}`
-    )
+    //TODO: send ga event
+
+    const stats = await this.$axios.$get(url)
     commit("updateData", stats)
     commit("updateLabel", stats)
   }

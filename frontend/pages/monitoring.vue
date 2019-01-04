@@ -7,7 +7,6 @@
       />
     </v-flex>
     <v-flex xs12 sm6 d-flex>
-
       <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" full-width lazy>
         <v-select
           slot="activator"
@@ -15,7 +14,7 @@
           :items="[selectedStation]"
           label="Choisissez une station"
           return-object
-          @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation})"
+          @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation, selectedCity})"
         />
         <v-card>
           <v-card-title class="headline accent" primary-title full-width>
@@ -96,7 +95,8 @@ export default {
       this.selectedInterval = interval
       this.fetchStats({
         selectedInterval: interval,
-        selectedStation: this.selectedStation
+        selectedStation: this.selectedStation,
+        city: this.selectedCity
       })
     },
     resetInputs() {
@@ -114,7 +114,8 @@ export default {
       }
       this.fetchStats({
         selectedInterval: this.selectedInterval,
-        selectedStation: this.selectedStation
+        selectedStation: this.selectedStation,
+        selectedCity: this.selectedCity
       })
       this.dialog = false
     }

@@ -213,3 +213,8 @@ export default {
   padding: 0;
 }
 </style>
+<style>
+.ol-attribution {
+  display: none !important;
+}
+</style>
