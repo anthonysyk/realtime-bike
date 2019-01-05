@@ -2,7 +2,7 @@
   <div class="map">
     <vl-map ref="map" :load-tiles-while-animating="true"
             :load-tiles-while-interacting="true" data-projection="EPSG:4326"
-            style="height: 70vh" @click="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
+            style="height: 100vh" @click="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
       <vl-view :zoom.sync="centerMap.zoom" :center.sync="centerMap.center" :rotation.sync="centerMap.rotation"/>
       <vl-geoloc>
         <template slot-scope="geoloc">

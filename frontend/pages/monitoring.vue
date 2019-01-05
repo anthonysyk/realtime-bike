@@ -7,7 +7,9 @@
       />
     </v-flex>
     <v-flex xs12 sm6 d-flex>
-      <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" full-width lazy>
+      <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" lazy fullscreen
+                hide-overlay
+                transition="dialog-bottom-transition">
         <v-select
           slot="activator"
           v-model="selectedStation"
@@ -142,6 +144,16 @@ export default {
 
 .chart-container {
   margin-top: 1rem;
-  display: contents;
+  display: block;
+  width: 100%;
+}
+.v-card__text {
+  padding: 0;
+}
+</style>
+
+<style>
+.v-dialog {
+  margin: 0px !important;
 }
 </style>

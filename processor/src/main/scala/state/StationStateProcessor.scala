@@ -151,11 +151,13 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     implicit def stringSerde: Serde[String] = Serdes.String()
 
-    val stations = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
+    val contracts = Seq("Lyon", "Paris", "Marseille")
+
+    val stations: KStream[String, Station] = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
       .map { (_, v) =>
         val station = Station.avroFormat.from(v)
         station.externalId -> station
-      }
+      }.filter { (_, value) => contracts.contains(value.contract_name) }
 
     import WindowInterval._
     createStationStateSummary(stations)
@@ -165,7 +167,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)
     createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, WINDOW_STATION_TOPIC_3h)
     createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, WINDOW_STATION_TOPIC_12h)
-//    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
+    //    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
 
 
     new KafkaStreams(builder.build(), streamingConfig)

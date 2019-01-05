@@ -1,6 +1,6 @@
 <template>
-  <v-card class="overlay-content" width="300">
-    <v-card-title primary-title>
+  <v-card class="overlay-content text-xs-center" width="300">
+    <v-card-title primary-title class="text-xs-center">
       <h3 :style="getStationColor(station)" >{{ station.name }}</h3><br>
       <v-chip v-if="isStationClosed(station)" class="ml-3 pl-1" color="red" text-color="white">
         <v-avatar>
