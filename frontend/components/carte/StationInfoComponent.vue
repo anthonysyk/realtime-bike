@@ -64,7 +64,7 @@ h3 {
 .overlay-content {
   padding: 5px 10px;
   font-size: 1rem;
-  border-radius: 0;
+  border-radius: 15px;
   ul {
     text-align: left;
     list-style: none;

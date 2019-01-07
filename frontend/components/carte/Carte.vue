@@ -26,7 +26,13 @@
 
             <!-- selected feature popup -->
             <div v-for="station in getStations()" :key="`overlay-${station.number}`">
-              {{ selectStation(station) }}
+              <vl-overlay v-if="selectStation(station)" id="overlay" :position="station.position"
+                          :positioning="positionning" class="overlay-content">
+                <template slot-scope="scope">
+                  <station-info-component :station="station"/>
+                </template>
+              </vl-overlay>
+
               <!--CIRCLES-->
               <vl-feature>
                 <vl-geom-circle :coordinates="station.position" :radius="selectedStation.number === station.number ? 100 : 60"/>
@@ -40,11 +46,6 @@
             </div>
             <!--// selected popup -->
           </vl-map>
-          <div v-if="Object.keys(selectedStation).length > 0" class="information-layout">
-            <v-flex xs12 sm5 class="station-information text-xs-center">
-              <station-info-component :station="selectedStation"/>
-            </v-flex>
-          </div>
         </v-card>
       </div>
     </div>
@@ -106,6 +107,7 @@ export default {
       this.isStationClicked(station)
         ? (this.selectedStation = station)
         : this.selectedStation
+      return this.isStationClicked(station)
     },
     getStations() {
       return this.stations.filter(station => this.isInsideMap(station))
