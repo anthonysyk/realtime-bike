@@ -1,49 +1,52 @@
 <template>
-  <v-layout wrap>
-    <v-flex xs12 sm6 d-flex>
-      <v-select v-model="selectedCity" :items="cities"
-                label="Choisissez une ville"
-                @change="updateCity(selectedCity.carte.city)"
-      />
-    </v-flex>
-    <v-flex xs12 sm6 d-flex>
-      <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" lazy fullscreen
-                hide-overlay
-                transition="dialog-bottom-transition">
-        <v-select
-          slot="activator"
-          v-model="selectedStation"
-          :items="[selectedStation]"
-          label="Choisissez une station"
-          return-object
-          @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation, selectedCity})"
+  <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
+    <v-subheader class="pl-0 pr-0">Sélectionnez une ville et une station pour visualiser le nombre de vélos par station aggrégé par interval</v-subheader>
+    <v-layout wrap>
+      <v-flex xs12 sm6 d-flex>
+        <v-select v-model="selectedCity" :items="cities"
+                  label="Choisissez une ville"
+                  @change="updateCity(selectedCity.carte.city)"
         />
-        <v-card>
-          <v-card-title class="headline accent" primary-title full-width>
-            <span class="white-label">{{ selectedCity.carte.city }}</span>
-            <v-spacer/>
-            <v-btn left icon dark @click="dialog = false">
-              <v-icon>close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <carte v-if="dialog === true" :stations="getFullStations" :center-map="selectedCity.carte"
-                   @updateStationEvent="updateStationEvent"/>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-    </v-flex>
-    <div class="text-xs-center chart-container">
-      <div class="interval-container">
-        <v-chip v-for="interval in intervals" :key="interval"
-                :color="selectedInterval === interval ? 'primary' : 'secondary'"
-                dark class="interval-chip" text-color="white"
-                @click="updateInterval(interval)"
-        >{{ interval }}</v-chip>
+      </v-flex>
+      <v-flex xs12 sm6 d-flex>
+        <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" lazy fullscreen
+                  hide-overlay
+                  transition="dialog-bottom-transition">
+          <v-select
+            slot="activator"
+            v-model="selectedStation"
+            :items="[selectedStation]"
+            label="Choisissez une station"
+            return-object
+            @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation, selectedCity})"
+          />
+          <v-card>
+            <v-card-title class="headline accent" primary-title full-width>
+              <span class="white-label">{{ selectedCity.carte.city }}</span>
+              <v-spacer/>
+              <v-btn left icon dark @click="dialog = false">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-card-title>
+            <v-card-text>
+              <carte v-if="dialog === true" :stations="getFullStations" :center-map="selectedCity.carte"
+                     @updateStationEvent="updateStationEvent"/>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+      </v-flex>
+      <div class="text-xs-center chart-container">
+        <div class="interval-container">
+          <v-chip v-for="interval in intervals" :key="interval"
+                  :color="selectedInterval === interval ? 'primary' : 'secondary'"
+                  dark class="interval-chip" text-color="white"
+                  @click="updateInterval(interval)"
+          >{{ interval }}</v-chip>
+        </div>
+        <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval"/>
       </div>
-      <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval"/>
-    </div>
-  </v-layout>
+    </v-layout>
+  </div>
 </template>
 
 <script>
@@ -59,25 +62,14 @@ export default {
   components: { MonitoringChart, Carte },
   data: () => ({
     dialog: false,
-    selectedCity: centers.default,
+    selectedCity: centers.find(center => center.carte.city === null),
     selectedStation: { text: "", value: "" },
-    defaultStation: { text: "toto", value: "toto" },
+    defaultStation: { text: "", value: "" },
     selectedInterval: "5min",
-    intervals: ["5min", "15min", "30min", "1h", "3h", "12h"],
-    cities: [
-      {
-        text: "Paris",
-        value: centers.paris
-      },
-      {
-        text: "Lyon",
-        value: centers.lyon
-      },
-      {
-        text: "Marseille",
-        value: centers.marseille
-      }
-    ]
+    intervals: ["5min", "15min", "30min", "1h", "3h"],
+    cities: centers
+      .filter(center => center.carte.city !== null)
+      .map(center => ({ text: center.carte.city, value: center }))
   }),
   async fetch({ store }) {
     store.dispatch("monitoring/fetchStations")
@@ -93,6 +85,9 @@ export default {
       fetchStats: "fetchStats",
       fetchFullStations: "fetchFullStations"
     }),
+    getResponsive() {
+      return this.$store.getters["app/getResponsive"]
+    },
     updateInterval(interval) {
       this.selectedInterval = interval
       this.fetchStats({

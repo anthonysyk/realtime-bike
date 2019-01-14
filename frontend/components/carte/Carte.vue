@@ -4,20 +4,10 @@
       <div>
         <v-card class="map">
           <vl-map ref="map" :load-tiles-while-animating="true"
-                  :load-tiles-while-interacting="true" data-projection="EPSG:4326"
-                  style="height: 70vh; width: 100%" @click="handleClickMap"
+                  :load-tiles-while-interacting="true" :style="{height: getMapHeight(), width: '100%'}"
+                  data-projection="EPSG:4326" @click="handleClickMap"
                   @movestart="enableLoader" @moveend="onMapPostCompose">
             <vl-view :zoom.sync="value.zoom" :center.sync="value.center" :rotation.sync="value.rotation"/>
-            <vl-geoloc>
-              <template slot-scope="geoloc">
-                <vl-feature v-if="geoloc.position" id="position-feature">
-                  <vl-geom-point :coordinates="geoloc.position"/>
-                  <vl-style-box>
-                    <vl-style-icon :scale="0.4" :anchor="[0.5, 1]" src="_media/marker.png"/>
-                  </vl-style-box>
-                </vl-feature>
-              </template>
-            </vl-geoloc>
 
             <loader :loader="loader" :clickable="true"/>
             <vl-layer-tile id="bingmaps">
@@ -70,6 +60,11 @@ export default {
       type: Array,
       required: true,
       default: () => []
+    },
+    responsive: {
+      type: Boolean,
+      required: true,
+      default: false
     }
   },
   data() {
@@ -96,6 +91,9 @@ export default {
     }
   },
   methods: {
+    getMapHeight() {
+      return this.responsive ? "91vh" : "95vh"
+    },
     handleClickMap(event) {
       this.clickCoordinate = event.coordinate
       return Object.keys(this.selectedStation).length > 0 &&

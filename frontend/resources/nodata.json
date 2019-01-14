@@ -1,0 +1,67 @@
+[
+  {
+    "carte": {
+      "city": "Stockholm",
+      "zoom": 14.5,
+      "center": [
+        18.061934,
+        59.3295715
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Dublin",
+      "zoom": 14.5,
+      "center": [
+        -6.2776148,
+        53.3478095
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Valence",
+      "zoom": 14.5,
+      "center": [
+        -0.3859587,
+        39.4715727
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Mulhouse",
+      "zoom": 14.5,
+      "center": [
+        7.3293531,
+        47.7501217
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Besancon",
+      "zoom": 14.5,
+      "center": [
+        6.0196766,
+        47.2393032
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  }
+]

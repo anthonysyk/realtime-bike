@@ -1,7 +1,8 @@
-{
-  "default": {
+[
+  {
     "carte": {
       "city": null,
+      "slug": "default",
       "zoom": 5,
       "center": [
         2.3380340037250313,
@@ -12,9 +13,10 @@
       "stations": []
     }
   },
-  "paris": {
+  {
     "carte": {
       "city": "Paris",
+      "slug": "paris",
       "zoom": 14.5,
       "center": [
         2.3256653515384667,
@@ -25,9 +27,10 @@
       "stations": []
     }
   },
-  "lyon": {
+  {
     "carte": {
       "city": "Lyon",
+      "slug": "lyon",
       "zoom": 14.5,
       "center": [
         4.842469526028807,
@@ -38,9 +41,10 @@
       "stations": []
     }
   },
-  "marseille": {
+  {
     "carte": {
       "city": "Marseille",
+      "slug": "marseille",
       "zoom": 14.5,
       "center": [
         5.3809710350488436,
@@ -50,5 +54,103 @@
       "geolocPosition": null,
       "stations": []
     }
+  },
+  {
+    "carte": {
+      "city": "Rouen",
+      "slug": "rouen",
+      "zoom": 14.5,
+      "center": [
+        1.091748460537274,
+        49.435858718810636
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Toulouse",
+      "slug": "toulouse",
+      "zoom": 14.5,
+      "center": [
+        1.437116112721153,
+        43.60393644423749
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Luxembourg",
+      "slug": "luxembourg",
+      "zoom": 14.5,
+      "center": [
+        6.1296179270071365,
+        49.61298208602665
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Amiens",
+      "slug": "amiens",
+      "zoom": 15,
+      "center": [
+        2.297911313193506,
+        49.89429919639494
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Nancy",
+      "slug": "nancy",
+      "zoom": 15,
+      "center": [
+        6.182505061014812,
+        48.6904134460508
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Creteil",
+      "slug": "creteil",
+      "zoom": 14,
+      "center": [
+        2.4586304274381927,
+        48.78138981456186
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
+  },
+  {
+    "carte": {
+      "city": "Nantes",
+      "slug": "nantes",
+      "zoom": 14.5,
+      "center": [
+        -1.5577028097075223,
+        47.21763951086439
+      ],
+      "rotation": 0,
+      "geolocPosition": null,
+      "stations": []
+    }
   }
-}
+]

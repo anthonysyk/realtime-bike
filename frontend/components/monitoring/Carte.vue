@@ -4,16 +4,6 @@
             :load-tiles-while-interacting="true" data-projection="EPSG:4326"
             style="height: 100vh" @click="clickCoordinate = $event.coordinate" @moveend="onMapPostCompose">
       <vl-view :zoom.sync="centerMap.zoom" :center.sync="centerMap.center" :rotation.sync="centerMap.rotation"/>
-      <vl-geoloc>
-        <template slot-scope="geoloc">
-          <vl-feature v-if="geoloc.position" id="position-feature">
-            <vl-geom-point :coordinates="geoloc.position"/>
-            <vl-style-box>
-              <vl-style-icon :scale="0.4" :anchor="[0.5, 1]" src="_media/marker.png"/>
-            </vl-style-box>
-          </vl-feature>
-        </template>
-      </vl-geoloc>
 
       <vl-layer-tile id="bingmaps">
         <vl-source-bing-maps :api-key="apiKey" :imagery-set="imagerySet"/>

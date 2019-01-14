@@ -1,4 +1,4 @@
-// import { event } from "vue-analytics"
+import { event } from "vue-analytics"
 
 const getEmptyState = () => ({
   stations: [],
@@ -50,7 +50,8 @@ const actions = {
       selectedStation.value
     }`
 
-    //TODO: send ga event
+    event("monitoring", "hit", selectedStation.value)
+    event("monitoring", `show-${selectedInterval}`, selectedStation.value)
 
     const stats = await this.$axios.$get(url)
     commit("updateData", stats)
