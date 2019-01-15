@@ -102,7 +102,7 @@ export default {
         {
           icon: "show_chart",
           title: "Séries Temporelles",
-          to: "/monitoring",
+          to: "/charts",
           type: "classic"
         },
         {

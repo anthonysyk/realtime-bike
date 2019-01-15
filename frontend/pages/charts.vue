@@ -43,20 +43,27 @@
                   @click="updateInterval(interval)"
           >{{ interval }}</v-chip>
         </div>
-        <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval"/>
+        <v-layout row wrap justify-space-around align-center>
+          <v-flex xs12 sm6 md6>
+            <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStats" getter="getStats"/>
+          </v-flex>
+          <v-flex xs12 sm6 md6>
+            <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStatsDelta" getter="getStatsDelta"/>
+          </v-flex>
+        </v-layout>
       </div>
     </v-layout>
   </div>
 </template>
 
 <script>
-import MonitoringChart from "~/components/monitoring/MonitoringChart"
-import centers from "~/resources/centers.json"
-import Carte from "@/components/monitoring/Carte"
+import MonitoringChart from "../components/charts/MonitoringChart"
+import centers from "../resources/centers.json"
+import Carte from "../components/charts/Carte"
 
 import { createNamespacedHelpers } from "vuex"
 
-const { mapGetters, mapActions } = createNamespacedHelpers("monitoring")
+const { mapGetters, mapActions } = createNamespacedHelpers("charts")
 
 export default {
   components: { MonitoringChart, Carte },
@@ -65,20 +72,25 @@ export default {
     selectedCity: centers.find(center => center.carte.city === null),
     selectedStation: { text: "", value: "" },
     defaultStation: { text: "", value: "" },
-    selectedInterval: "5min",
+    selectedInterval: "1h",
     intervals: ["5min", "15min", "30min", "1h", "3h"],
     cities: centers
       .filter(center => center.carte.city !== null)
       .map(center => ({ text: center.carte.city, value: center }))
   }),
   async fetch({ store }) {
-    store.dispatch("monitoring/fetchStations")
+    store.dispatch("charts/fetchStations")
   },
   computed: {
-    ...mapGetters(["getStationsByCity", "getFullStations"])
+    ...mapGetters([
+      "getStationsByCity",
+      "getFullStations",
+      "getStats",
+      "getStatsDelta"
+    ])
   },
   destroyed: function() {
-    this !== undefined ? this.$store.commit("monitoring/resetState") : undefined
+    this !== undefined ? this.$store.commit("charts/resetState") : undefined
   },
   methods: {
     ...mapActions({

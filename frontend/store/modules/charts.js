@@ -4,10 +4,22 @@ const getEmptyState = () => ({
   stations: [],
   fullStations: [],
   labels: [],
-  data: []
+  data: [],
+  bikesDroped: [],
+  bikesTaken: []
 })
 
 const state = () => getEmptyState()
+
+const colors = {
+  blue: "rgba(52,152,219,.5)",
+  grey: "rgba(93,109,126,.5)",
+  green: "rgba(88,214,141,.5)",
+  yellow: "rgba(244,208,63,.5)",
+  lightblue: "rgba(133,193,233,.5)",
+  lightred: "rgba(236,112,99,.5)",
+  purple: "rgba(215,189,226,.5)"
+}
 
 const getters = {
   getFullStations: state => state.fullStations,
@@ -20,8 +32,24 @@ const getters = {
     datasets: [
       {
         label: "Nombre de vélos dans la station",
-        backgroundColor: "#f87979",
+        backgroundColor: colors.blue,
         data: state.data
+      }
+    ],
+    fill: false
+  }),
+  getStatsDelta: state => ({
+    labels: state.labels,
+    datasets: [
+      {
+        label: "Nombre de vélos déposés",
+        backgroundColor: colors.green,
+        data: state.bikesDroped
+      },
+      {
+        label: "Nombre de vélos pris",
+        backgroundColor: colors.lightred,
+        data: state.bikesTaken.map(value => -value)
       }
     ],
     fill: false
@@ -50,8 +78,8 @@ const actions = {
       selectedStation.value
     }`
 
-    event("monitoring", "hit", selectedStation.value)
-    event("monitoring", `show-${selectedInterval}`, selectedStation.value)
+    event("charts", "hit", selectedStation.value)
+    event("charts", `show-${selectedInterval}`, selectedStation.value)
 
     const stats = await this.$axios.$get(url)
     commit("updateData", stats)
@@ -68,6 +96,8 @@ const mutations = {
   },
   updateData(state, stats) {
     state.data = stats.map(station => station.available_bikes)
+    state.bikesDroped = stats.map(station => station.state.bikes_droped)
+    state.bikesTaken = stats.map(station => station.state.bikes_taken)
   },
   updateLabel(state, stats) {
     state.labels = stats.map(station => station.label)

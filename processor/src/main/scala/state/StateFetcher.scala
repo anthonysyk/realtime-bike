@@ -5,12 +5,14 @@ import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.parser.{parse, _}
 import io.circe.syntax._
-import models.{Coordinates, Station, StationReferential}
+import models.{Coordinates, Station, StationReferential, TopStation}
 import utils.date.{ChartDateHelper, DateHelper}
 import versatile.json.CirceHelper._
 import versatile.kafka.iq.http.KeyValueFetcher
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 
 class StateFetcher(kvf: KeyValueFetcher[String, String]) {
@@ -66,7 +68,7 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
 
   }
 
-  def fetchStationsStateByKeyWithCoordinates(hostKey: String, coordinates: Coordinates) = {
+  def fetchStationsStateByKeyWithCoordinates(hostKey: String, coordinates: Coordinates): Future[Seq[Station]] = {
     for {
       stations <- kvf.fetch(hostKey, StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/" + hostKey)
       .map(result => parse(result).getRight.as[Station].right.toOption.toSeq)
@@ -78,6 +80,21 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
         isXInside && isYInside
       }
     } yield stationsInsideMap
+  }
+
+
+  def fetchTopStations: Future[Json] = {
+    val toTime = DateHelper.tomorrowTimestamp
+    val fromTime = DateHelper.oldestTimestamp
+    val elements = kvf.fetchAllWindowed(StationStateProcessor.TOP_STATION_STATE, "/station/top/ALL", fromTime, toTime).map(results =>
+      results.distinct.flatMap(value => parse(value._2).getRight.as[TopStation].right.toOption.toSeq)
+    )
+
+    for {
+      topStations <- elements
+    } yield {
+      topStations.groupBy(_.contract_name).mapValues(_.sortWith((a, b) => (a.bikes_taken + a.bikes_droped) > (b.bikes_taken + b.bikes_droped)).take(5)).asJson
+    }
   }
 
 }

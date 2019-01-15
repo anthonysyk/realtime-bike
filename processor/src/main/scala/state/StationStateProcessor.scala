@@ -9,16 +9,17 @@ import akka.stream.ActorMaterializer
 import enums.WindowInterval
 import http.{InteractiveQueryWorkflow, MyHTTPService}
 import io.circe.syntax._
-import models.{CustomSerde, Station}
+import models.{CustomSerde, Station, TopStation}
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
-import org.apache.kafka.streams.kstream.TimeWindows
+import org.apache.kafka.streams.kstream.{TimeWindows, Windowed}
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, ByteArrayWindowStore, StreamsBuilder}
 import org.apache.kafka.streams.state.HostInfo
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import utils.PathHelper
+import versatile.json.CirceHelper._
 import versatile.kafka.iq.http.{HttpRequester, KeyValueFetcher}
 import versatile.kafka.iq.services.{LocalStateStoreQuery, MetadataService}
 
@@ -27,6 +28,8 @@ import scala.concurrent.ExecutionContext
 object StationStateProcessor extends InteractiveQueryWorkflow {
 
   final val ACCESS_STATION_STATE = "access-station-state"
+
+  final val TOP_STATION_STATE = "top-station-state"
 
   implicit val _stringSerde: Serde[String] = Serdes.String()
   implicit val _stringSerializer: Serializer[String] = Serdes.String().serializer()
@@ -83,6 +86,54 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
   }
 
+  def createTopStationsKTable(stationRecord: KStream[String, Station]): KTable[Windowed[String], String] = {
+
+    implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
+
+    val materialized: Materialized[String, String, ByteArrayWindowStore] =
+      Materialized.as(TOP_STATION_STATE)
+        .withKeySerde(_stringSerde)
+        .withValueSerde(_stringSerde)
+
+    val window = Duration.ofHours(24)
+
+    type ExternalId = String
+    type City = String
+
+    import io.circe.jawn._
+    import io.circe.syntax._
+
+
+    def aggregation: (ExternalId, Station, String) => String = { (_, station, acc) =>
+      val currentTopStation = parse(acc).getRight.as[TopStation].right.toOption.get
+
+      val delta = currentTopStation.available_bikes - station.available_bikes
+      val bikesDroped = if (delta < 0) currentTopStation.bikes_droped + Math.abs(delta) else currentTopStation.bikes_droped
+      val bikesTaken = if (delta > 0) currentTopStation.bikes_taken + Math.abs(delta) else currentTopStation.bikes_taken
+
+      TopStation(
+        number = station.number,
+        name = station.name,
+        address = station.address,
+        status = station.status,
+        contract_name = station.contract_name,
+        available_bike_stands = station.available_bike_stands,
+        available_bikes = station.available_bikes,
+        bikes_droped = if(currentTopStation.counter > 0) bikesDroped else 0,
+        bikes_taken = if(currentTopStation.counter > 0) bikesTaken else 0,
+        totalBikes = currentTopStation.totalBikes :+ station.available_bikes,
+        delta = currentTopStation.delta :+ delta,
+        counter = currentTopStation.counter + 1
+      ).asJson.noSpaces
+
+    }
+
+    stationRecord
+      .groupByKey
+      .windowedBy(TimeWindows.of(window))
+      .aggregate(TopStation.empty.asJson.noSpaces)(aggregation)(materialized)
+  }
+
   def createStationStateSummary(stationRecord: KStream[String, Station]) = {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
@@ -101,7 +152,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
   }
 
-  def createStationStateWindow(stationRecord: KStream[String, Station], window: Duration, stateStoreName: String, topic: String) = {
+  def createStationStateWindow(stationRecord: KStream[String, Station], window: Duration, stateStoreName: String, topic: String): Unit = {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
     val materialized: Materialized[String, String, ByteArrayWindowStore] =
@@ -115,7 +166,9 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     groupedStream
       .windowedBy(TimeWindows.of(window))
       .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
-      .toStream.map { case (k, v) => k.toString -> v }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
+      .toStream.map {
+      case (k, v) => k.toString -> v
+    }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
@@ -123,7 +176,9 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     // Kafka stream configuration
     val streamingConfig: Properties = {
       val streamsConfiguration = new Properties()
-      streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, s"state-${scala.util.Random.nextInt(100)}")
+      streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, s"state-${
+        scala.util.Random.nextInt(100)
+      }")
       streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "station-state")
       streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafka.bootstrap_server)
       // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
@@ -154,20 +209,25 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     val contracts = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")
 
     val stations: KStream[String, Station] = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
-      .map { (_, v) =>
-        val station = Station.avroFormat.from(v)
-        station.externalId -> station
-      }.filter { (_, value) => contracts.contains(value.contract_name) }
+      .map {
+        (_, v) =>
+          val station = Station.avroFormat.from(v)
+          station.externalId -> station
+      }.filter {
+      (_, value) => contracts.contains(value.contract_name)
+    }
+
 
     import WindowInterval._
+
     createStationStateSummary(stations)
     createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, WINDOW_STATION_TOPIC_5min)
     createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, WINDOW_STATION_TOPIC_15min)
     createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, WINDOW_STATION_TOPIC_30min)
     createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)
     createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, WINDOW_STATION_TOPIC_3h)
-    //    createStationStateWindow(stations, Duration.ofHours(12), WINDOW_STATION_STATE_12h, WINDOW_STATION_TOPIC_12h)
-    //    createStationStateWindow(stations, Duration.ofDays(1), WINDOW_STATION_STATE_1j, WINDOW_STATION_TOPIC_1j)
+
+    createTopStationsKTable(stations)
 
 
     new KafkaStreams(builder.build(), streamingConfig)

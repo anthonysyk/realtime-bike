@@ -26,25 +26,15 @@ class MyHTTPService(
                    ) extends InteractiveQueryHttpService(hostInfo, actorSystem, actorMaterializer, ec) with Directives {
 
 
-  val StateSocket = new StateSocket(fetcher, actorSystem, actorMaterializer, ec)
-
-  val routineSupervisor = new RoutineSupervisor(StateSocket.websocketActor)
+  val routineSupervisor = new RoutineSupervisor()
 
   routineSupervisor.run()
 
   // define the routes
   val routes: Flow[HttpRequest, HttpResponse, Any] = {
-    get {
-      path("ws") {
-        parameter('window) { window =>
-          StateSocket.ensurePublisherIsAlive()
-          handleWebSocketMessages(StateSocket.start)
-        }
-      }
+    path("stations") {
+      complete(fetcher.fetchAllStationsReferential)
     } ~
-      path("stations") {
-        complete(fetcher.fetchAllStationsReferential)
-      } ~
       path("station" / "access" / Segment) {
         case "ALL" =>
           complete {
@@ -74,6 +64,11 @@ class MyHTTPService(
                 fetcher.fetchWindow(hostKey, window)
               }
             } else complete(StatusCodes.NotAcceptable, "not a valid window interval")
+          } ~
+          pathPrefix("top") {
+            complete {
+              fetcher.fetchTopStations
+            }
           }
       }
   }

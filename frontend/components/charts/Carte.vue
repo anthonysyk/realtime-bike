@@ -36,7 +36,7 @@
 <script>
 import { transformExtent } from "vuelayers/lib/_esm/ol-ext"
 import { OVERLAY_POSITIONING } from "vuelayers/lib/_esm/ol-ext/consts"
-import StationInfoComponent from "../monitoring/StationInfoComponent"
+import StationInfoComponent from "../charts/StationInfoComponent"
 
 export default {
   components: { StationInfoComponent },
