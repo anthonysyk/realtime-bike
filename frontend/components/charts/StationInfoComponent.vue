@@ -15,7 +15,7 @@
       <v-icon>directions_bike</v-icon><div class="grid-item-text"> {{ station.available_bikes }} vélo(s)</div>
       <v-icon>local_parking</v-icon><div class="grid-item-text"> {{ station.bike_stands }} place(s)</div>
     </div>
-    <v-card-actions>
+    <v-card-actions class="text-xs-center">
       <v-btn flat color="orange" @click="$emit('updateStationEvent', station)">Sélectionner</v-btn>
     </v-card-actions>
   </v-card>

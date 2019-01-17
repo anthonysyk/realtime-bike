@@ -1,67 +1,196 @@
 <template>
   <div>
-    <v-subheader class="pl-3 pr-0">Dashboard</v-subheader>
-    <v-layout row wrap justify-space-around align-center>
-      <v-flex xs12 md6 class="pa-3">
-        <v-card class="pa-4">
-          <v-card-title>
-            <h1 class="ma-auto">Vélos pris en 24h</h1>&nbsp;&nbsp;
-            <v-spacer/>
-          </v-card-title>
-          <doughnut-example v-if="getTopCities.length > 0" :data="getTopCities"/>
-        </v-card>
-      </v-flex>
-      <v-flex xs12 md6 class="pa-3">
-        <v-card>
-          <v-card-title>
-            <h1 class="ma-auto">Trafic par ville sur 24h</h1>
-            <v-spacer/>
-          </v-card-title>
-          <v-data-table
-            :headers="headers"
-            :items="getTopCities"
-            :pagination.sync="pagination"
-            class="elevation-1"
-            hide-actions
-          >
-            <template slot="items" slot-scope="props">
-              <td class="text-xs-left">{{ props.item.name }}</td>
-              <td class="text-xs-center red--text">{{ props.item.bikes_taken }}</td>
-              <td class="text-xs-center green--text">{{ props.item.bikes_droped }}</td>
-              <td class="text-xs-center">{{ props.item.bikes_taken + props.item.bikes_droped }}</td>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-flex>
-    </v-layout>
+    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Sélectionnez une ville et une station pour visualiser le nombre de vélos par station aggrégé par interval</v-subheader>
+    <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
+      <v-layout wrap>
+        <v-flex xs12 sm6 d-flex class="pr-2">
+          <v-select v-model="selectedCity" :items="cities"
+                    label="Choisissez une ville"
+                    @change="updateCity(selectedCity.carte.city)"
+          />
+        </v-flex>
+        <v-flex xs12 sm6 d-flex class="pr-2">
+          <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" lazy fullscreen
+                    hide-overlay
+                    transition="dialog-bottom-transition">
+            <v-select
+              slot="activator"
+              v-model="selectedStation"
+              :items="[selectedStation]"
+              label="Choisissez une station"
+              return-object
+              @change="Object.keys(selectedInterval).length > 0 && fetchStats({selectedInterval, selectedStation, selectedCity})"
+            />
+            <v-card>
+              <v-card-title class="headline accent" primary-title full-width>
+                <span class="white-label">{{ selectedCity.carte.city }}</span>
+                <v-spacer/>
+                <v-btn left icon dark @click="dialog = false">
+                  <v-icon>close</v-icon>
+                </v-btn>
+              </v-card-title>
+              <v-card-text>
+                <carte v-if="dialog === true" :stations="getFullStations" :center-map="selectedCity.carte"
+                       @updateStationEvent="updateStationEvent"/>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+        </v-flex>
+        <div class="text-xs-center chart-container">
+          <div class="interval-container">
+            <v-chip v-for="interval in intervals" :key="interval"
+                    :color="selectedInterval === interval ? 'primary' : 'secondary'"
+                    dark class="interval-chip" text-color="white"
+                    @click="updateInterval(interval)"
+            >{{ interval }}</v-chip>
+          </div>
+          <v-layout row wrap justify-space-around align-center>
+            <v-flex xs12 sm6 md6>
+              <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStats" getter="getStats"/>
+            </v-flex>
+            <v-flex xs12 sm6 md6>
+              <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStatsDelta" getter="getStatsDelta"/>
+            </v-flex>
+          </v-layout>
+        </div>
+      </v-layout>
+    </div>
+    <v-snackbar
+      v-if="!selectedStation.value.length > 0 && dialog === false"
+      v-model="snackbar"
+      :timeout="0"
+      :vertical="getResponsive()"
+      top="true"
+      right="true"
+      color="info"
+    >
+      Veuillez choisir une station
+      <v-btn
+        flat
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
-import DoughnutExample from "../components/charts/DoughnutChart"
+import MonitoringChart from "../components/charts/MonitoringChart"
+import centers from "../resources/centers.json"
+import Carte from "../components/charts/Carte"
 
 import { createNamespacedHelpers } from "vuex"
 
-const { mapGetters } = createNamespacedHelpers("dashboard")
+const { mapGetters, mapActions } = createNamespacedHelpers("charts")
 
 export default {
-  components: {
-    DoughnutExample
-  },
+  components: { MonitoringChart, Carte },
   data: () => ({
-    pagination: { sortBy: "bikes_taken", descending: true, rowsPerPage: -1 },
-    headers: [
-      { text: "Ville", value: "city", sortable: false, align: "left" },
-      { text: "Vélos pris", value: "bikes_taken", align: "center" },
-      { text: "Vélos déposés", value: "bikes_droped", align: "center" },
-      { text: "Total", value: "total", align: "center" }
-    ]
+    dialog: false,
+    snackbar: true,
+    selectedCity: centers.find(center => center.carte.city === "Paris"),
+    selectedStation: { text: "Cambon - Rivoli", value: "1020_Paris" },
+    defaultStation: { text: "", value: "" },
+    selectedInterval: "1h",
+    intervals: ["5min", "15min", "30min", "1h", "3h"],
+    cities: centers
+      .filter(center => center.carte.city !== null)
+      .map(center => ({ text: center.carte.city, value: center }))
   }),
   async fetch({ store }) {
-    store.dispatch("dashboard/fetchTopCities")
+    store.dispatch("charts/fetchStations")
   },
   computed: {
-    ...mapGetters(["getTopCities"])
+    ...mapGetters([
+      "getStationsByCity",
+      "getFullStations",
+      "getStats",
+      "getStatsDelta"
+    ])
+  },
+  destroyed: function() {
+    this !== undefined ? this.$store.commit("charts/resetState") : undefined
+  },
+  beforeMount() {
+    this.updateCity(this.selectedCity.carte.city)
+    this.selectedStation = { text: "Cambon - Rivoli", value: "1020_Paris" }
+    const that = this
+    this.fetchStats({
+      selectedInterval: that.selectedInterval,
+      selectedStation: that.selectedStation,
+      selectedCity: that.selectedCity
+    })
+  },
+  methods: {
+    ...mapActions({
+      fetchStats: "fetchStats",
+      fetchFullStations: "fetchFullStations"
+    }),
+    getResponsive() {
+      return this.$store.getters["app/getResponsive"]
+    },
+    updateInterval(interval) {
+      this.selectedInterval = interval
+      this.fetchStats({
+        selectedInterval: interval,
+        selectedStation: this.selectedStation,
+        city: this.selectedCity
+      })
+    },
+    resetInputs() {
+      this.$store.commit("charts/resetState")
+      this.selectedStation = { text: "", value: "" }
+    },
+    updateCity(city) {
+      this.resetInputs()
+      this.fetchFullStations(city)
+    },
+    updateStationEvent(station) {
+      this.selectedStation = {
+        text: station.address,
+        value: [station.number, station.contract_name].join("_")
+      }
+      this.fetchStats({
+        selectedInterval: this.selectedInterval,
+        selectedStation: this.selectedStation,
+        selectedCity: this.selectedCity
+      })
+      this.dialog = false
+    }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.white-label {
+  color: white;
+}
+.interval-container {
+  margin: auto;
+}
+
+.interval-chip {
+  position: initial;
+  margin-right: 0.5rem;
+  &:hover {
+    transform: scale(1.1) !important;
+  }
+  margin-bottom: 1rem;
+}
+
+.chart-container {
+  margin-top: 1rem;
+  display: block;
+  width: 100%;
+}
+.v-card__text {
+  padding: 0;
+}
+</style>
+
+<style>
+.v-dialog {
+  margin: 0px !important;
+}
+</style>

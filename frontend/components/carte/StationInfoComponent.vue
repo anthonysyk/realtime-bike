@@ -17,7 +17,7 @@
     </div>
     <hr>
     <div class="grid-container">
-      <div/><div class="grid-item-text">Places disponibles : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>
+      <div/><div class="grid-item-text">Places disponibles : {{ Number.parseFloat(station.state.bike_stands !== 0 ? (station.available_bikes / station.bike_stands)*100 : 0).toFixed(1) }} %</div>
     </div>
   </v-card>
 </template>

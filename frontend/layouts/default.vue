@@ -88,11 +88,10 @@ export default {
       fixed: false,
       items: [
         // { icon: "map", title: "Carte", to: "/" },
-        { icon: "dashboard", title: "Dashboard", to: "/", type: "classic" },
         {
           icon: "show_chart",
           title: "Séries Temporelles",
-          to: "/charts",
+          to: "/",
           type: "classic"
         },
         {
@@ -105,6 +104,7 @@ export default {
             to: `/carte/${city.carte.slug}`
           }))
         },
+        { icon: "dashboard", title: "Ville", to: "/city", type: "classic" },
         {
           icon: "list",
           title: "Classement",
