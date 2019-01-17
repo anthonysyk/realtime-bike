@@ -1,14 +1,14 @@
 <template>
   <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
-    <v-subheader class="pl-0 pr-0">Sélectionnez une ville et une station pour visualiser le nombre de vélos par station aggrégé par interval</v-subheader>
+    <v-subheader class="pl-0 pr-0 mb-2">Sélectionnez une ville et une station pour visualiser le nombre de vélos par station aggrégé par interval</v-subheader>
     <v-layout wrap>
-      <v-flex xs12 sm6 d-flex>
+      <v-flex xs12 sm6 d-flex class="pr-2">
         <v-select v-model="selectedCity" :items="cities"
                   label="Choisissez une ville"
                   @change="updateCity(selectedCity.carte.city)"
         />
       </v-flex>
-      <v-flex xs12 sm6 d-flex>
+      <v-flex xs12 sm6 d-flex class="pr-2">
         <v-dialog v-if="selectedCity.carte.city !== null" v-model="dialog" lazy fullscreen
                   hide-overlay
                   transition="dialog-bottom-transition">
@@ -69,8 +69,8 @@ export default {
   components: { MonitoringChart, Carte },
   data: () => ({
     dialog: false,
-    selectedCity: centers.find(center => center.carte.city === null),
-    selectedStation: { text: "", value: "" },
+    selectedCity: centers.find(center => center.carte.city === "Paris"),
+    selectedStation: { text: "Cambon - Rivoli", value: "1020_Paris" },
     defaultStation: { text: "", value: "" },
     selectedInterval: "1h",
     intervals: ["5min", "15min", "30min", "1h", "3h"],
@@ -92,6 +92,16 @@ export default {
   destroyed: function() {
     this !== undefined ? this.$store.commit("charts/resetState") : undefined
   },
+  beforeMount() {
+    this.updateCity(this.selectedCity.carte.city)
+    this.selectedStation = { text: "Cambon - Rivoli", value: "1020_Paris" }
+    const that = this
+    this.fetchStats({
+      selectedInterval: that.selectedInterval,
+      selectedStation: that.selectedStation,
+      selectedCity: that.selectedCity
+    })
+  },
   methods: {
     ...mapActions({
       fetchStats: "fetchStats",
@@ -109,7 +119,7 @@ export default {
       })
     },
     resetInputs() {
-      this.$store.commit("monitoring/resetState")
+      this.$store.commit("charts/resetState")
       this.selectedStation = { text: "", value: "" }
     },
     updateCity(city) {

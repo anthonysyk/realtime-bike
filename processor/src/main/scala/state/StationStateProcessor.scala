@@ -13,12 +13,13 @@ import models.{CustomSerde, Station, TopStation}
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
-import org.apache.kafka.streams.kstream.{TimeWindows, Windowed}
+import org.apache.kafka.streams.kstream.{Suppressed, TimeWindows, Windowed}
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, ByteArrayWindowStore, StreamsBuilder}
 import org.apache.kafka.streams.state.HostInfo
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import utils.PathHelper
+import utils.date.DateHelper
 import versatile.json.CirceHelper._
 import versatile.kafka.iq.http.{HttpRequester, KeyValueFetcher}
 import versatile.kafka.iq.services.{LocalStateStoreQuery, MetadataService}
@@ -96,6 +97,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         .withValueSerde(_stringSerde)
 
     val window = Duration.ofHours(24)
+    val grace = Duration.ofMinutes(10)
 
     type ExternalId = String
     type City = String
@@ -113,7 +115,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
       TopStation(
         number = station.number,
-        name = station.name,
+        name = TopStation.cleanupName(station.contract_name, station.name),
         address = station.address,
         status = station.status,
         contract_name = station.contract_name,
@@ -121,9 +123,12 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         available_bikes = station.available_bikes,
         bikes_droped = if(currentTopStation.counter > 0) bikesDroped else 0,
         bikes_taken = if(currentTopStation.counter > 0) bikesTaken else 0,
-        totalBikes = currentTopStation.totalBikes :+ station.available_bikes,
-        delta = currentTopStation.delta :+ delta,
-        counter = currentTopStation.counter + 1
+        totalBikes = Nil, // currentTopStation.totalBikes :+ station.available_bikes,
+        delta =  Nil, //currentTopStation.delta :+ delta,
+        counter = currentTopStation.counter + 1,
+        start_date = if(currentTopStation.counter == 0) DateHelper.convertToReadable(station.last_update) else currentTopStation.start_date,
+        last_update = DateHelper.convertToReadable(station.last_update),
+        start_timestamp = if(currentTopStation.counter == 0) station.last_update else currentTopStation.start_timestamp
       ).asJson.noSpaces
 
     }
@@ -132,6 +137,8 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
       .groupByKey
       .windowedBy(TimeWindows.of(window))
       .aggregate(TopStation.empty.asJson.noSpaces)(aggregation)(materialized)
+
+
   }
 
   def createStationStateSummary(stationRecord: KStream[String, Station]) = {
@@ -166,9 +173,9 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     groupedStream
       .windowedBy(TimeWindows.of(window))
       .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
-      .toStream.map {
-      case (k, v) => k.toString -> v
-    }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
+//      .toStream.map {
+//      case (k, v) => k.toString -> v
+//    }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 

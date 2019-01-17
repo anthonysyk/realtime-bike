@@ -2,7 +2,7 @@ package state
 
 import io.circe.parser._
 import io.circe.syntax._
-import models.{Station, StationState}
+import models.{Station, StationState, TopStation}
 import utils.date.DateHelper
 import versatile.json.CirceHelper._
 
@@ -27,6 +27,7 @@ object StateAggregators {
     }
 
     currStation.copy(
+      name = TopStation.cleanupName(currStation.contract_name, currStation.name),
       state = Some(StationState(
         start_date = start_date,
         last_update = DateHelper.convertToReadable(currStation.last_update),

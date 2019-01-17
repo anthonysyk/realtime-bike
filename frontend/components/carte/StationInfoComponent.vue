@@ -1,6 +1,6 @@
 <template>
-  <v-card class="overlay-content">
-    <v-card-title primary-title>
+  <v-card class="overlay-content text-xs-center" width="300">
+    <v-card-title primary-title class="text-xs-center">
       <h3 :style="getStationColor(station)" class="text-xs-center">{{ station.name }}</h3><br>
       <v-chip v-if="isStationClosed(station)" color="red" text-color="white" class="margin-auto">
         <v-avatar>
@@ -14,6 +14,10 @@
       <!--<div/><div class="grid-item-text">Disponibilité : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>-->
       <v-icon>directions_bike</v-icon><div class="grid-item-text"> {{ station.available_bikes }} vélo(s)</div>
       <v-icon>local_parking</v-icon><div class="grid-item-text"> {{ station.bike_stands }} place(s)</div>
+    </div>
+    <hr>
+    <div class="grid-container">
+      <div/><div class="grid-item-text">Places disponibles : {{ Number.parseFloat(station.state.availability).toFixed(1) }} %</div>
     </div>
   </v-card>
 </template>

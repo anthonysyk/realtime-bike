@@ -1,4 +1,5 @@
 import { event } from "vue-analytics"
+import Colors from "../../utils/colors"
 
 const getEmptyState = () => ({
   stations: [],
@@ -11,16 +12,6 @@ const getEmptyState = () => ({
 
 const state = () => getEmptyState()
 
-const colors = {
-  blue: "rgba(52,152,219,.5)",
-  grey: "rgba(93,109,126,.5)",
-  green: "rgba(88,214,141,.5)",
-  yellow: "rgba(244,208,63,.5)",
-  lightblue: "rgba(133,193,233,.5)",
-  lightred: "rgba(236,112,99,.5)",
-  purple: "rgba(215,189,226,.5)"
-}
-
 const getters = {
   getFullStations: state => state.fullStations,
   getStationsByCity: state => city =>
@@ -32,7 +23,7 @@ const getters = {
     datasets: [
       {
         label: "Nombre de vélos dans la station",
-        backgroundColor: colors.blue,
+        backgroundColor: Colors.color().blue,
         data: state.data
       }
     ],
@@ -42,14 +33,14 @@ const getters = {
     labels: state.labels,
     datasets: [
       {
-        label: "Nombre de vélos déposés",
-        backgroundColor: colors.green,
-        data: state.bikesDroped
+        label: "Nombre de vélos pris",
+        backgroundColor: Colors.color().lightred,
+        data: state.bikesTaken
       },
       {
-        label: "Nombre de vélos pris",
-        backgroundColor: colors.lightred,
-        data: state.bikesTaken.map(value => -value)
+        label: "Nombre de vélos déposés",
+        backgroundColor: Colors.color().green,
+        data: state.bikesDroped.map(value => -value)
       }
     ],
     fill: false
@@ -74,6 +65,7 @@ const actions = {
     commit("updateStations", stations)
   },
   async fetchStats({ commit }, { selectedInterval, selectedStation }) {
+    console.log(selectedStation)
     const url = `kafka/station/access/win/${selectedInterval}/${
       selectedStation.value
     }`

@@ -15,7 +15,10 @@ case class TopStation(
                        bikes_taken: Int,
                        totalBikes: Seq[Int],
                        delta: Seq[Int],
-                       counter: Int
+                       counter: Int,
+                       start_date: String,
+                       last_update: String,
+                       start_timestamp: Long
                      ) {
 }
 
@@ -38,7 +41,25 @@ object TopStation {
       bikes_taken = 0,
       totalBikes = Nil,
       delta = Nil,
-      counter = 0
+      counter = 0,
+      start_date = "",
+      last_update = "",
+      start_timestamp = 0L
     )
+  }
+
+  def cleanupName(city: String, name: String): String = {
+    city match {
+      case "Luxembourg" => name.drop(7)
+      case "Nancy" => name.split(" - ", 2).lift(1).getOrElse(name)
+      case "Paris" => name
+      case "Toulouse" => name.split("- ", 2).lift(1).getOrElse(name)
+      case "Nantes" => name.drop(7)
+      case "Marseille" => name.split("-", 2).lift(1).getOrElse(name)
+      case "Lyon" => name.split("-", 2).lift(1).getOrElse(name)
+      case "Amiens" => name.split("- ", 2).lift(1).getOrElse(name)
+      case "Creteil" => name.split("-", 2).lift(1).getOrElse(name)
+      case "Rouen" => name.split("-", 2).lift(1).getOrElse(name)
+    }
   }
 }

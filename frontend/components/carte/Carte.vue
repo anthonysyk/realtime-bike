@@ -27,8 +27,8 @@
               <vl-feature>
                 <vl-geom-circle :coordinates="station.position" :radius="selectedStation.number === station.number ? 100 : 60"/>
                 <vl-style-box>
-                  <vl-style-stroke :color="getStationColor(station.status)"/>
-                  <vl-style-fill :color="getStationColor(station.status)"/>
+                  <vl-style-stroke :color="getStationColor(station)"/>
+                  <vl-style-fill :color="getStationColor(station)"/>
                 </vl-style-box>
               </vl-feature>
               <!--CIRCLES-->
@@ -151,8 +151,26 @@ export default {
         isInside(yClick, yStation)
       )
     },
-    getStationColor(status) {
-      return status === "CLOSED" ? "red" : "#3399cc"
+    getStationColor(station) {
+      // function applyColor() {
+      //   const availability = station.state.availability
+      //   let color = "#3399cc"
+      //   if (availability <= 20) {
+      //     color = "#D35400"
+      //   } else if (availability <= 40 && availability > 20) {
+      //     color = "#EB984E"
+      //   } else if (availability <= 60 && availability > 40) {
+      //     color = "#F4D03F"
+      //   } else if (availability <= 90 && availability > 60) {
+      //     color = "#82E0AA"
+      //   } else if (availability > 90) {
+      //     color = "#45B39D"
+      //   } else {
+      //     color = "#3399cc"
+      //   }
+      //   return color
+      // }
+      return station.status === "CLOSED" ? "red" : "#3399cc"
     },
     onMapPostCompose() {
       if (this.currExtent === this.$refs.map.$map.frameState_.extent) return

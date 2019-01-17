@@ -90,6 +90,12 @@ export default {
         // { icon: "map", title: "Carte", to: "/" },
         { icon: "dashboard", title: "Dashboard", to: "/", type: "classic" },
         {
+          icon: "show_chart",
+          title: "Séries Temporelles",
+          to: "/charts",
+          type: "classic"
+        },
+        {
           icon: "map",
           title: "Carte",
           type: "nested",
@@ -98,12 +104,6 @@ export default {
             title: city.carte.city,
             to: `/carte/${city.carte.slug}`
           }))
-        },
-        {
-          icon: "show_chart",
-          title: "Séries Temporelles",
-          to: "/charts",
-          type: "classic"
         },
         {
           icon: "list",

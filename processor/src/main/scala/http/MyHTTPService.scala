@@ -70,7 +70,14 @@ class MyHTTPService(
               fetcher.fetchTopStations
             }
           }
+      } ~
+    pathPrefix("city") {
+      pathPrefix("top") {
+        complete {
+          fetcher.fetchCitiesTotalDelta
+        }
       }
+    }
   }
 
   // start the http server

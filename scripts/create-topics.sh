@@ -13,17 +13,17 @@ kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partit
 
 kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic station_structured --config retention.ms=-1
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic station_state --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic station_state --config retention.ms=259200000 --config retention.bytes=3000000000
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_5min --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_5min --config retention.ms=172800000 --config retention.bytes=5000000000
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_15min --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_15min --config retention.ms=172800000 --config retention.bytes=5000000000
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_30min --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_30min --config retention.ms=172800000 --config retention.bytes=5000000000
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_1h --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_1h --config retention.ms=172800000 --config retention.bytes=5000000000
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_3h --config retention.ms=259200000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic window_3h --config retention.ms=172800000 --config retention.bytes=5000000000
 
 kafka-topics --list --zookeeper localhost:2181
 

@@ -2,3 +2,4 @@ assets/css/**
 node_modules
 dist
 prettier/**
+utils/**

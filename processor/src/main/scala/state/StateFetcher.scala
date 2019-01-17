@@ -3,40 +3,39 @@ package state
 import enums.WindowInterval
 import io.circe.Json
 import io.circe.generic.auto._
-import io.circe.parser.{parse, _}
+import io.circe.parser.parse
 import io.circe.syntax._
-import models.{Coordinates, Station, StationReferential, TopStation}
+import models._
 import utils.date.{ChartDateHelper, DateHelper}
 import versatile.json.CirceHelper._
 import versatile.kafka.iq.http.KeyValueFetcher
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 
 class StateFetcher(kvf: KeyValueFetcher[String, String]) {
 
-  def fetchStationsStateByKey(hostKey: String) =
+  def fetchStationsStateByKey(hostKey: String): Future[Json] =
     kvf.fetch(hostKey, StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/" + hostKey)
       .map(result => parse(result).getRight)
 
 
-  def fetchAllStationsState =
+  def fetchAllStationsState: Future[Json] =
     kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
       results.map {
         case (key, value) => parse(value).getRight.asObject.map(_.add("id", key.asJson))
       }.asJson
     )
 
-  def fetchStationsStateByContract(contract: String) =
+  def fetchStationsStateByContract(contract: String): Future[Json] =
     kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
       results.map {
         case (key, value) => parse(value).getRight.as[Station].right.toOption
       }.filter(_.exists(_.contract_name == contract)).flatMap(_.toSeq).asJson
     )
 
-  def fetchAllStationsReferential =
+  def fetchAllStationsReferential: Future[Json] =
     kvf.fetchAll(StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/ALL").map(results =>
       results.flatMap {
         case (_, value) => parse(value).getRight.as[Station].right.toOption.map(station =>
@@ -45,7 +44,7 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
       }.asJson
     )
 
-  def fetchWindow(hostKey: String, window: String) = {
+  def fetchWindow(hostKey: String, window: String): Future[Json] = {
     val toTime = DateHelper.tomorrowTimestamp
     val fromTime = DateHelper.oldestTimestamp
     val elements = kvf.fetchWindowed(hostKey, WindowInterval.createNamespace(window), WindowInterval.createPath(window), fromTime, toTime).map(results =>
@@ -71,7 +70,7 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
   def fetchStationsStateByKeyWithCoordinates(hostKey: String, coordinates: Coordinates): Future[Seq[Station]] = {
     for {
       stations <- kvf.fetch(hostKey, StationStateProcessor.ACCESS_STATION_STATE, "/stations/access/" + hostKey)
-      .map(result => parse(result).getRight.as[Station].right.toOption.toSeq)
+        .map(result => parse(result).getRight.as[Station].right.toOption.toSeq)
       stationsInsideMap = stations.filter { station =>
         val stationX = station.position.lat
         val stationY = station.position.lng
@@ -83,7 +82,7 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
   }
 
 
-  def fetchTopStations: Future[Json] = {
+  def fetchTopStations: Future[Map[String, List[TopStation]]] = {
     val toTime = DateHelper.tomorrowTimestamp
     val fromTime = DateHelper.oldestTimestamp
     val elements = kvf.fetchAllWindowed(StationStateProcessor.TOP_STATION_STATE, "/station/top/ALL", fromTime, toTime).map(results =>
@@ -93,7 +92,30 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
     for {
       topStations <- elements
     } yield {
-      topStations.groupBy(_.contract_name).mapValues(_.sortWith((a, b) => (a.bikes_taken + a.bikes_droped) > (b.bikes_taken + b.bikes_droped)).take(5)).asJson
+      topStations.groupBy(_.contract_name).mapValues(_.sortWith((a, b) => (a.bikes_taken + a.bikes_droped) > (b.bikes_taken + b.bikes_droped)).take(5))
+    }
+  }
+
+  def fetchCitiesTotalDelta: Future[Seq[TopCity]] = {
+    val toTime = DateHelper.tomorrowTimestamp
+    val fromTime = DateHelper.oldestTimestamp
+    val elements = kvf.fetchAllWindowed(StationStateProcessor.TOP_STATION_STATE, "/station/top/ALL", fromTime, toTime).map(results =>
+      results.distinct.flatMap(value => parse(value._2).getRight.as[TopStation].right.toOption.toSeq)
+    )
+
+    for {
+      topStations <- elements
+    } yield {
+      topStations.groupBy(_.contract_name).map { case (city, stations) =>
+        val lastStationsWindow = stations.groupBy(_.number).mapValues(_.sortBy(_.start_timestamp).reverse.headOption).values
+        lastStationsWindow.flatten.foldLeft(TopCity(city, 0, 0))((a, b) =>
+          TopCity(
+            name = city,
+            bikes_taken = a.bikes_taken + b.bikes_taken,
+            bikes_droped = a.bikes_droped + b.bikes_droped
+          )
+        )
+      }.toSeq
     }
   }
 
