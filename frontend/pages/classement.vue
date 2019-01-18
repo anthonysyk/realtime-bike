@@ -2,7 +2,7 @@
   <div>
     <v-subheader class="pl-3 pr-0">Top 5 des stations ayant le plus de trafic par ville sur 24h</v-subheader>
     <v-layout row wrap justify-space-around align-center class="ml-2 mr-2">
-      <v-flex v-for="(top, idx) in getTopStations" :key="idx" xs12 sm6 md6 class="pa-3">
+      <v-flex v-for="(top, idx) in getTopStations" :key="idx" xs12 sm12 md6 class="pa-3">
         <v-card>
           <v-card-title>
             {{ idx + 1 }} -

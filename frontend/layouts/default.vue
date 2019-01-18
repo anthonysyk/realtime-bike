@@ -76,7 +76,7 @@
 <script>
 import { createNamespacedHelpers } from "vuex"
 
-import cities from "../resources/centers"
+import cities from "../static/centers"
 
 const { mapGetters, mapActions } = createNamespacedHelpers("app")
 

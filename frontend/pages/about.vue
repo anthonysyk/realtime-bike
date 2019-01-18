@@ -6,7 +6,7 @@
                     contain
       />
     </v-flex>
-    <v-flex xs8 column justify-center align-center fluid d-flex class="pa-2">
+    <v-flex xs8 column justify-center align-center fluid d-flex class="pa-2 mt-2">
       <a href="https://www.linkedin.com/in/anthony-ssi-yan-kai-386a93a0/" target="_blank">
         <i class="fab fa-linkedin pb-1 icon linkedin"/>
       </a>
@@ -65,8 +65,8 @@ export default {
   border-radius: 50%;
   margin: 0 auto;
   position: relative;
-  width: 200px;
-  height: 200px !important;
+  width: 150px;
+  height: 150px !important;
 }
 
 i {

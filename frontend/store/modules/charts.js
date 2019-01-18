@@ -65,7 +65,6 @@ const actions = {
     commit("updateStations", stations)
   },
   async fetchStats({ commit }, { selectedInterval, selectedStation }) {
-    console.log(selectedStation)
     const url = `kafka/station/access/win/${selectedInterval}/${
       selectedStation.value
     }`

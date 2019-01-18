@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Sélectionnez une ville et une station pour visualiser le nombre de vélos par station aggrégé par interval</v-subheader>
+    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Consultez le nombre de vélos par station sur les dernières 24h</v-subheader>
     <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
       <v-layout wrap>
         <v-flex xs12 sm6 d-flex class="pr-2">
@@ -77,7 +77,7 @@
 
 <script>
 import MonitoringChart from "../components/charts/MonitoringChart"
-import centers from "../resources/centers.json"
+import centers from "../static/centers.json"
 import Carte from "../components/charts/Carte"
 
 import { createNamespacedHelpers } from "vuex"

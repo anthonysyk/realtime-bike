@@ -4,6 +4,10 @@ const nodeExternals = require("webpack-node-externals")
 
 const isDev = process.env.NODE_ENV === "development"
 
+const prodUrl = "http://realtime-bike.fr"
+
+const baseUrl = isDev ? "http://localhost" : prodUrl
+
 const GoogleSearchConsoleTag = {
   name: "google-site-verification",
   content: "BSpbU-fffE31gtY5DYUSjf4RkkV31k6VaqLa1rtXTlI"
@@ -17,6 +21,9 @@ const meta = [
 ]
 
 module.exports = {
+  env: {
+    baseUrl: process.env.BASE_URL || baseUrl
+  },
   mode: "spa",
   /*
   ** Headers of the page
@@ -83,8 +90,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    baseURL: isDev ? "http://localhost" : "http://realtime-bike.fr",
-    browserBaseURL: isDev ? "http://localhost" : "http://realtime-bike.fr"
+    baseURL: baseUrl,
+    browserBaseURL: baseUrl
   },
   /*
   ** Build configuration

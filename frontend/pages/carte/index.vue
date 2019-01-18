@@ -18,7 +18,7 @@ import CarteComponent from "../../components/carte/Carte.vue"
 import Loader from "../../components/Loader.vue"
 
 import { createNamespacedHelpers } from "vuex"
-import centers from "../../resources/centers.json"
+import centers from "../../static/centers.json"
 
 const { mapGetters, mapActions } = createNamespacedHelpers("carte")
 
