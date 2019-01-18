@@ -1,13 +1,14 @@
 package utils.date
 
 import java.text.SimpleDateFormat
+import java.util.Locale
 
-import io.circe.syntax._
 import io.circe.parser._
 import models.Station
 
 object ChartDateHelper {
 
+  val humanReadableDate = new SimpleDateFormat("EEEE HH:mm", Locale.FRENCH)
   val date = new SimpleDateFormat("dd-MM")
   val time = new SimpleDateFormat("HH:mm")
   val datetime = new SimpleDateFormat("dd-MM HH:mm")
@@ -15,15 +16,15 @@ object ChartDateHelper {
   date.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
   datetime.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
 
-  def createLabel(timestamps: Seq[Long]) = {
+  def createLabel(timestamps: Seq[Long]): (Option[String], Seq[String]) = {
     timestamps.foldLeft(Option.empty[String] -> Seq.empty[String]) { (leftAcc, right) =>
       leftAcc match {
         case (None, acc) =>
-          Option(date.format(right)) -> (acc :+ datetime.format(right))
+          Option(date.format(right)) -> (acc :+ humanReadableDate.format(right).capitalize)
         case (Some(previousDate), acc) if date.format(right) == previousDate =>
           Some(previousDate) -> (acc :+ time.format(right))
         case (Some(previousDate), acc) if date.format(right) != previousDate =>
-          Some(date.format(right)) -> (acc :+ datetime.format(right))
+          Some(date.format(right)) -> (acc :+ humanReadableDate.format(right).capitalize)
       }
     }
 

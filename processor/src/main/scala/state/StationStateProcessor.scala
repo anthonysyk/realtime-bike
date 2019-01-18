@@ -13,7 +13,7 @@ import models.{CustomSerde, Station, TopStation}
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
-import org.apache.kafka.streams.kstream.{Suppressed, TimeWindows, Windowed}
+import org.apache.kafka.streams.kstream.{TimeWindows, Windowed}
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, ByteArrayWindowStore, StreamsBuilder}
 import org.apache.kafka.streams.state.HostInfo
@@ -166,6 +166,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
       Materialized.as(stateStoreName)
         .withKeySerde(_stringSerde)
         .withValueSerde(_stringSerde)
+      .withRetention(Duration.ofDays(7))
 
     val groupedStream = stationRecord.groupByKey
 
@@ -204,6 +205,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
       // Set the commit interval to 500ms so that any changes are flushed frequently and the summary
       // data are updated with low latency.
       streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500")
+//      streamsConfiguration.put(StreamsConfig.WINDOW_STORE_CHANGE_LOG_ADDITIONAL_RETENTION_MS_CONFIG, (86400000 * 7).toString)
 
       streamsConfiguration
     }
@@ -228,11 +230,12 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     import WindowInterval._
 
     createStationStateSummary(stations)
-    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, WINDOW_STATION_TOPIC_5min)
+//    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, WINDOW_STATION_TOPIC_5min)
     createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, WINDOW_STATION_TOPIC_15min)
     createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, WINDOW_STATION_TOPIC_30min)
     createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)
     createStationStateWindow(stations, Duration.ofHours(3), WINDOW_STATION_STATE_3h, WINDOW_STATION_TOPIC_3h)
+    createStationStateWindow(stations, Duration.ofHours(6), WINDOW_STATION_STATE_6h, WINDOW_STATION_TOPIC_6h)
 
     createTopStationsKTable(stations)
 

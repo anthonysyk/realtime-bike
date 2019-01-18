@@ -11,10 +11,12 @@ const getters = {
         return {
           city: key,
           tops: state.topStations[key],
-          total: state.topStations[key].reduce((a, b) => a + b.bikes_taken)
+          total: state.topStations[key]
+            .map(station => station.bikes_taken)
+            .reduce((a, b) => a + b)
         }
       })
-      .sort((a, b) => (a.total > b.total ? 1 : -1))
+      .sort((a, b) => b.total - a.total)
 }
 
 const actions = {

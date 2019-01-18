@@ -51,6 +51,9 @@
             <v-flex xs12 sm6 md6>
               <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStatsDelta" getter="getStatsDelta"/>
             </v-flex>
+            <!--<v-flex xs12 sm6 md6>-->
+            <!--<monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStatsAvailability" getter="getStatsAvailability"/>-->
+            <!--</v-flex>-->
           </v-layout>
         </div>
       </v-layout>
@@ -93,7 +96,7 @@ export default {
     selectedStation: { text: "Cambon - Rivoli", value: "1020_Paris" },
     defaultStation: { text: "", value: "" },
     selectedInterval: "1h",
-    intervals: ["5min", "15min", "30min", "1h", "3h"],
+    intervals: ["15min", "30min", "1h", "3h", "6h"],
     cities: centers
       .filter(center => center.carte.city !== null)
       .map(center => ({ text: center.carte.city, value: center }))
@@ -106,7 +109,8 @@ export default {
       "getStationsByCity",
       "getFullStations",
       "getStats",
-      "getStatsDelta"
+      "getStatsDelta",
+      "getStatsAvailability"
     ])
   },
   destroyed: function() {
