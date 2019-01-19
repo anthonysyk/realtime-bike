@@ -12,7 +12,6 @@ import org.apache.kafka.streams.state.HostInfo
 import routines.RoutineSupervisor
 import state.StateFetcher
 import versatile.kafka.iq.http.http.InteractiveQueryHttpService
-import websocket.StateSocket
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}

@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import enums.WindowInterval
 import http.{InteractiveQueryWorkflow, MyHTTPService}
 import io.circe.syntax._
-import models.{CustomSerde, Station, TopStation}
+import models.{CustomSerde, Station, TopStation, WindowStation}
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{Serde, Serdes, Serializer}
@@ -57,6 +57,8 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     // service for fetching from local state store
     val localStateStoreQuery = new LocalStateStoreQuery[String, String]
+
+    val localStateStoreQueryWindow = new LocalStateStoreQuery[String, WindowStation]
 
     // http service for request handling
     val httpRequester = new HttpRequester(system, materializer, executionContext)
@@ -121,14 +123,14 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
         contract_name = station.contract_name,
         available_bike_stands = station.available_bike_stands,
         available_bikes = station.available_bikes,
-        bikes_droped = if(currentTopStation.counter > 0) bikesDroped else 0,
-        bikes_taken = if(currentTopStation.counter > 0) bikesTaken else 0,
+        bikes_droped = if (currentTopStation.counter > 0) bikesDroped else 0,
+        bikes_taken = if (currentTopStation.counter > 0) bikesTaken else 0,
         totalBikes = Nil, // currentTopStation.totalBikes :+ station.available_bikes,
-        delta =  Nil, //currentTopStation.delta :+ delta,
+        delta = Nil, //currentTopStation.delta :+ delta,
         counter = currentTopStation.counter + 1,
-        start_date = if(currentTopStation.counter == 0) DateHelper.convertToReadable(station.last_update) else currentTopStation.start_date,
+        start_date = if (currentTopStation.counter == 0) DateHelper.convertToReadable(station.last_update) else currentTopStation.start_date,
         last_update = DateHelper.convertToReadable(station.last_update),
-        start_timestamp = if(currentTopStation.counter == 0) station.last_update else currentTopStation.start_timestamp
+        start_timestamp = if (currentTopStation.counter == 0) station.last_update else currentTopStation.start_timestamp
       ).asJson.noSpaces
 
     }
@@ -163,20 +165,18 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     implicit val serializer: Grouped[String, Station] = Grouped.`with`(_stringSerde, CustomSerde.STATION_SERDE)
     val materialized: Materialized[String, String, ByteArrayWindowStore] =
-      Materialized.as(stateStoreName)
-        .withKeySerde(_stringSerde)
-        .withValueSerde(_stringSerde)
-      .withRetention(Duration.ofDays(7))
+      Materialized.as(stateStoreName)(_stringSerde, _stringSerde)
+        .withRetention(Duration.ofDays(3))
 
     val groupedStream = stationRecord.groupByKey
 
     /* WINDOW_STATION_STATE */
     groupedStream
       .windowedBy(TimeWindows.of(window))
-      .aggregate(Station.empty.asJson.noSpaces)(StateAggregators.foldStationState)(materialized)
-//      .toStream.map {
-//      case (k, v) => k.toString -> v
-//    }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
+      .aggregate(WindowStation.empty.asJson.noSpaces)(StateAggregators.foldWindowStation)(materialized)
+    //      .toStream.map {
+    //      case (k, v) => k.toString -> v
+    //    }.to(topic)(Produced.`with`(_stringSerde, _stringSerde))
 
   }
 
@@ -205,7 +205,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
       // Set the commit interval to 500ms so that any changes are flushed frequently and the summary
       // data are updated with low latency.
       streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, "500")
-//      streamsConfiguration.put(StreamsConfig.WINDOW_STORE_CHANGE_LOG_ADDITIONAL_RETENTION_MS_CONFIG, (86400000 * 7).toString)
+      //      streamsConfiguration.put(StreamsConfig.WINDOW_STORE_CHANGE_LOG_ADDITIONAL_RETENTION_MS_CONFIG, (86400000 * 7).toString)
 
       streamsConfiguration
     }
@@ -215,22 +215,29 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     implicit def stringSerde: Serde[String] = Serdes.String()
 
+    val MAXIMUM_FROM = DateHelper.minusDaysTimestamp(7)
+    val FLAG_STATION = "1020_Paris"
+
     val contracts = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")
 
-    val stations: KStream[String, Station] = builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
+    val stations: KStream[String, Station] =
+      builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
       .map {
         (_, v) =>
           val station = Station.avroFormat.from(v)
+          if(station.externalId.contains(FLAG_STATION)) {
+            val timestampDeltaUntilProcessing = station.last_update - MAXIMUM_FROM
+            if(timestampDeltaUntilProcessing < 0) println(timestampDeltaUntilProcessing)
+          }
           station.externalId -> station
       }.filter {
-      (_, value) => contracts.contains(value.contract_name)
+      (_, value) => contracts.contains(value.contract_name) && value.last_update > MAXIMUM_FROM
     }
 
 
     import WindowInterval._
 
     createStationStateSummary(stations)
-//    createStationStateWindow(stations, Duration.ofMinutes(5), WINDOW_STATION_STATE_5min, WINDOW_STATION_TOPIC_5min)
     createStationStateWindow(stations, Duration.ofMinutes(15), WINDOW_STATION_STATE_15min, WINDOW_STATION_TOPIC_15min)
     createStationStateWindow(stations, Duration.ofMinutes(30), WINDOW_STATION_STATE_30min, WINDOW_STATION_TOPIC_30min)
     createStationStateWindow(stations, Duration.ofHours(1), WINDOW_STATION_STATE_1h, WINDOW_STATION_TOPIC_1h)

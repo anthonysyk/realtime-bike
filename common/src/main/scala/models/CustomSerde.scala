@@ -13,6 +13,8 @@ object CustomSerde {
 
   val TOP_STATION_SERDE: Serde[TopStation] = SerdeHelper.createSerde[TopStation]
 
+  val WINDOW_STATION_SERDE: Serde[WindowStation] = SerdeHelper.createSerde[WindowStation]
+
   def genericAvroSerde: Serde[GenericRecord] = {
     import scala.collection.JavaConverters._
     val schemaRegistry: util.Map[String, String] = Map("schema.registry.url" -> "http://localhost:8081").asJava

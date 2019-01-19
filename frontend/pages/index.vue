@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Consultez le nombre de vélos par station sur les dernières 24h</v-subheader>
+    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Consultez les séries temporelles par station</v-subheader>
     <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
       <v-layout wrap>
         <v-flex xs12 sm6 d-flex class="pr-2">
@@ -45,10 +45,10 @@
             >{{ interval }}</v-chip>
           </div>
           <v-layout row wrap justify-space-around align-center>
-            <v-flex xs12 sm6 md6>
+            <v-flex xs12>
               <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStats" getter="getStats"/>
             </v-flex>
-            <v-flex xs12 sm6 md6>
+            <v-flex xs12>
               <monitoring-chart :city="selectedCity" :station="selectedStation" :interval="selectedInterval" :data="getStatsDelta" getter="getStatsDelta"/>
             </v-flex>
             <!--<v-flex xs12 sm6 md6>-->

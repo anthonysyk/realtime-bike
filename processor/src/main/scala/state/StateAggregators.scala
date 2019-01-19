@@ -2,7 +2,7 @@ package state
 
 import io.circe.parser._
 import io.circe.syntax._
-import models.{Station, StationState, TopStation}
+import models.{Station, StationState, TopStation, WindowStation}
 import utils.date.DateHelper
 import versatile.json.CirceHelper._
 
@@ -37,6 +37,33 @@ object StateAggregators {
         counter = counter,
         counterStateChanged = counterStateChanged
       ))
+    ).asJson.noSpaces
+  }
+
+  type JsonString = String
+
+  def foldWindowStation: (String, Station, JsonString) => JsonString = { (_, currStation, stringAcc) =>
+    val windowStation = parse(stringAcc).getRight.as[WindowStation].right.toOption.get
+
+    val delta = windowStation.available_bikes - currStation.available_bikes
+    val bikesDroped = if (delta < 0) windowStation.bikes_droped + Math.abs(delta) else windowStation.bikes_droped
+    val bikesTaken = if (delta > 0) windowStation.bikes_taken + Math.abs(delta) else windowStation.bikes_taken
+
+    val start_date = if(windowStation.counter == 0) DateHelper.convertToReadable(currStation.last_update) else windowStation.start_date
+
+    val counter = windowStation.counter + 1
+
+    WindowStation(
+      externalId = currStation.externalId,
+      name = TopStation.cleanupName(currStation.contract_name, currStation.name),
+      available_bike_stands = currStation.available_bike_stands,
+      available_bikes = currStation.available_bikes,
+      last_update_ts = currStation.last_update,
+      last_update = DateHelper.convertToReadable(currStation.last_update),
+      start_date = start_date,
+      bikes_taken = if (windowStation.counter > 0) bikesTaken else 0,
+      bikes_droped = if (windowStation.counter > 0) bikesDroped else 0,
+      counter = counter
     ).asJson.noSpaces
   }
 

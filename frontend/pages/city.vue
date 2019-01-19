@@ -2,7 +2,7 @@
   <div>
     <v-subheader class="pl-3 pr-0">Dashboard</v-subheader>
     <v-layout row wrap justify-space-around align-center>
-      <v-flex xs12 md6 class="pa-3">
+      <v-flex xs12 class="pa-3">
         <v-card class="pa-4">
           <v-card-title>
             <h1 class="ma-auto">Nombre de vélos utilisés par ville en 24h</h1>&nbsp;&nbsp;
@@ -11,7 +11,7 @@
           <doughnut-example v-if="getTopCities.length > 0" :data="getTopCities"/>
         </v-card>
       </v-flex>
-      <v-flex xs12 md6 class="pa-3">
+      <v-flex xs12 class="pa-3 mb-2">
         <v-card>
           <v-card-title>
             <h1 class="ma-auto">Trafic par ville sur 24h</h1>

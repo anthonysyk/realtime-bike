@@ -1,4 +1,4 @@
-import {event} from "vue-analytics"
+import { event } from "vue-analytics"
 import Colors from "../../utils/colors"
 
 const getEmptyState = () => ({
@@ -22,7 +22,7 @@ const getters = {
   getStationsByCity: state => city =>
     state.stations
       .filter(station => station.contract_name === city)
-      .map(station => ({text: station.address, value: station.id})),
+      .map(station => ({ text: station.address, value: station.id })),
   getStats: state => ({
     labels: state.labels,
     datasets: [
@@ -63,7 +63,7 @@ const getters = {
 }
 
 const actions = {
-  async fetchFullStations({commit}, city) {
+  async fetchFullStations({ commit }, city) {
     const fullStations = await this.$axios.$get(`/kafka/station/access/${city}`)
     const parsedStations = fullStations.map(
       station =>
@@ -75,14 +75,14 @@ const actions = {
     )
     commit("updateFullStations", parsedStations)
   },
-  async fetchStations({commit}) {
+  async fetchStations({ commit }) {
     const stations = await this.$axios.$get("/kafka/stations")
     commit("updateStations", stations)
   },
-  async fetchStats({commit}, {selectedInterval, selectedStation}) {
+  async fetchStats({ commit }, { selectedInterval, selectedStation }) {
     const url = `kafka/station/access/win/${selectedInterval}/${
       selectedStation.value
-      }`
+    }`
 
     event("charts", "hit", selectedStation.value)
     event("charts", `show-${selectedInterval}`, selectedStation.value)
@@ -102,8 +102,8 @@ const mutations = {
   },
   updateData(state, stats) {
     state.data = stats.map(station => station.available_bikes)
-    state.bikesDroped = stats.map(station => station.state.bikes_droped)
-    state.bikesTaken = stats.map(station => station.state.bikes_taken)
+    state.bikesDroped = stats.map(station => station.bikes_droped)
+    state.bikesTaken = stats.map(station => station.bikes_taken)
     state.availability = stats.map(station =>
       Number.parseFloat(
         station.bike_stands !== 0

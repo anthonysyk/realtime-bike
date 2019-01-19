@@ -1,7 +1,7 @@
 package state
 
 import enums.WindowInterval
-import io.circe.Json
+import io.circe.{Json, JsonObject}
 import io.circe.generic.auto._
 import io.circe.parser.parse
 import io.circe.syntax._
@@ -48,13 +48,13 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
     val toTime = DateHelper.tomorrowTimestamp
     val fromTime = DateHelper.oldestTimestamp
     val elements = kvf.fetchWindowed(hostKey, WindowInterval.createNamespace(window), WindowInterval.createPath(window), fromTime, toTime).map(results =>
-      results.distinct.flatMap(value => parse(value._2).getRight.as[Station].right.toOption.toSeq)
-        .sortBy(_.last_update)
-        .foldLeft(Seq.empty[Station]) { (acc, right) =>
-          if (acc.lastOption.exists(_.last_update == right.last_update)) acc else acc :+ right
+      results.distinct.flatMap(value => parse(value._2).getRight.as[WindowStation].right.toOption.toSeq)
+        .sortBy(_.last_update_ts)
+        .foldLeft(Seq.empty[WindowStation]) { (acc, right) =>
+          if (acc.lastOption.exists(_.last_update_ts == right.last_update_ts)) acc else acc :+ right
         })
 
-    val labels = elements.map(elem => ChartDateHelper.createLabel(elem.map(_.last_update))._2)
+    val labels = elements.map(elem => ChartDateHelper.createLabel(elem.map(_.last_update_ts)))
 
     for {
       elems <- elements
@@ -64,7 +64,6 @@ class StateFetcher(kvf: KeyValueFetcher[String, String]) {
         .add("index", Json.fromInt(index))
         .add("label", Json.fromString(label))
     }.asJson
-
   }
 
   def fetchStationsStateByKeyWithCoordinates(hostKey: String, coordinates: Coordinates): Future[Seq[Station]] = {

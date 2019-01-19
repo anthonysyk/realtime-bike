@@ -20,6 +20,8 @@ object DateHelper {
 
   def minusHoursTimestamp(hours: Int): Long = new Date(new DateTime(nowTimestamp).minusHours(hours).getMillis).getTime
 
+  def minusDaysTimestamp(days: Int): Long = new Date(new DateTime(nowTimestamp).minusDays(days).getMillis).getTime
+
   def convertToReadable(ts: Long) = {
     sdf.format(ts)
   }
