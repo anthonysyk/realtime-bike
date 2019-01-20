@@ -58,8 +58,6 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     // service for fetching from local state store
     val localStateStoreQuery = new LocalStateStoreQuery[String, String]
 
-    val localStateStoreQueryWindow = new LocalStateStoreQuery[String, WindowStation]
-
     // http service for request handling
     val httpRequester = new HttpRequester(system, materializer, executionContext)
 
@@ -215,7 +213,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
 
     implicit def stringSerde: Serde[String] = Serdes.String()
 
-    val MAXIMUM_FROM = DateHelper.minusDaysTimestamp(7)
+    val MAXIMUM_FROM = DateHelper.minusDaysTimestamp(3)
     val FLAG_STATION = "1020_Paris"
 
     val contracts = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Consultez les séries temporelles par station</v-subheader>
+    <v-subheader class="pl-0 pr-0 mb-2 ml-3">Evolution du nombre de vélos durant les dernières 72h</v-subheader>
     <div :class="getResponsive() ? 'pa-2' : 'pa-5'">
       <v-layout wrap>
         <v-flex xs12 sm6 d-flex class="pr-2">
@@ -94,7 +94,7 @@ export default {
     snackbar: true,
     selectedCity: centers.find(center => center.carte.city === "Paris"),
     selectedStation: { text: "Cambon - Rivoli", value: "1020_Paris" },
-    defaultStation: { text: "", value: "" },
+    defaultStation: { text: "Choisissez une station", value: "" },
     selectedInterval: "1h",
     intervals: ["15min", "30min", "1h", "3h", "6h"],
     cities: centers
@@ -144,7 +144,7 @@ export default {
     },
     resetInputs() {
       this.$store.commit("charts/resetState")
-      this.selectedStation = { text: "", value: "" }
+      this.selectedStation = { text: "Choississez une station", value: "" }
     },
     updateCity(city) {
       this.resetInputs()

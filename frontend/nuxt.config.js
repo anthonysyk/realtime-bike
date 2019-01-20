@@ -17,6 +17,16 @@ const meta = [
   { charset: "utf-8" },
   { name: "viewport", content: "width=device-width, initial-scale=1" },
   { hid: "description", name: "description", content: pkg.description },
+  { hid: "og:title", property: "og:title", content: "RealTime Bike" },
+  { hid: "og:type", property: "og:type", content: "website" },
+  {
+    hid: "og:image",
+    name: "image",
+    property: "og:image",
+    content: prodUrl + "/website-image.png"
+  },
+  { hid: "og:url", property: "og:url", content: prodUrl },
+  { name: "author", content: "Anthony SSI YAN KAI" },
   GoogleSearchConsoleTag
 ]
 
@@ -29,7 +39,7 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: "Real-Time Bike",
+    title: "RealTime Bike",
     meta: meta,
     link: [
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },

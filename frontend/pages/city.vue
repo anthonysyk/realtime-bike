@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-subheader class="pl-3 pr-0">Dashboard</v-subheader>
+    <v-subheader class="pl-3 pr-0">Comparaison entre les différentes villes sur les dernières 24h</v-subheader>
     <v-layout row wrap justify-space-around align-center>
       <v-flex xs12 class="pa-3">
         <v-card class="pa-4">

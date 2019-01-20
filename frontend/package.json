@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "Application permettant de consulter le nombre de vélibs dans les stations. ",
+  "description": "Application permettant de consulter le nombre de vélos dans les stations.",
   "author": "Anthony SSI YAN KAI",
   "private": true,
   "scripts": {

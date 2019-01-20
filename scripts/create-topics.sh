@@ -5,7 +5,7 @@
 
 export PATH="$PATH:/opt/confluent/bin"
 
-kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic station --config retention.ms=604800000
+kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic station --config retention.ms=345600000
 
 kafka-topics --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic replay_station --config retention.ms=259200000
 

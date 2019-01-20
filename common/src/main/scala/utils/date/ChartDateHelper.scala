@@ -1,21 +1,24 @@
 package utils.date
 
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.{Locale, TimeZone}
 
 import io.circe.parser._
 import models.{Station, WindowStation}
 
 object ChartDateHelper {
 
+  val TIMEZONE: TimeZone = java.util.TimeZone.getTimeZone("ECT")
   val humanReadableDate = new SimpleDateFormat("EEEE dd HH:mm", Locale.FRENCH)
   val humanReadableDateWithoutTime = new SimpleDateFormat("EEEE", Locale.FRENCH)
   val date = new SimpleDateFormat("dd-MM")
   val time = new SimpleDateFormat("HH:mm")
   val datetime = new SimpleDateFormat("dd-MM HH:mm")
-  time.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
-  date.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
-  datetime.setTimeZone(java.util.TimeZone.getTimeZone("ECT"))
+  time.setTimeZone(TIMEZONE)
+  date.setTimeZone(TIMEZONE)
+  datetime.setTimeZone(TIMEZONE)
+  humanReadableDate.setTimeZone(TIMEZONE)
+  humanReadableDateWithoutTime.setTimeZone(TIMEZONE)
 
   def createLabel(timestamps: Seq[Long]): Seq[String] = {
     timestamps.foldLeft(Option.empty[Long] -> Seq.empty[String]) { (leftAcc, right) =>
