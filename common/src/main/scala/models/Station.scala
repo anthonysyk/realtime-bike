@@ -80,6 +80,9 @@ object Station {
     last_update = 0,
     state = None
   )
+
+  val filteredContracts: Seq[String] = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")
+
 }
 
 case class Position(lat: Double, lng: Double)
@@ -130,4 +133,5 @@ object StationReferential {
     println("Référentiel mis à jour")
 
   }
+
 }

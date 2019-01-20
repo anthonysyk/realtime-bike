@@ -38,14 +38,14 @@ const getters = {
     labels: state.labels,
     datasets: [
       {
-        label: "Nombre de vélos pris",
-        backgroundColor: Colors.color().lightred,
-        data: state.bikesTaken
-      },
-      {
         label: "Nombre de vélos déposés",
         backgroundColor: Colors.color().green,
-        data: state.bikesDroped.map(value => -value)
+        data: state.bikesDroped
+      },
+      {
+        label: "Nombre de vélos pris",
+        backgroundColor: Colors.color().lightred,
+        data: state.bikesTaken.map(value => value)
       }
     ],
     fill: false

@@ -10,7 +10,8 @@ export default class {
       purple: "rgba(215,189,226,.5)",
       darkred: "rgba(146,43,33,.5)",
       darkblue: "rgba(31,97,141,.5)",
-      darkgreen: "rgba(25,111,61,.5)"
+      darkgreen: "rgba(25,111,61,.5)",
+      redishpink: "rgba(241,148,138,.6"
     }
   }
 }

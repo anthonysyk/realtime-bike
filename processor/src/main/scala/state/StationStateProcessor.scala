@@ -216,8 +216,6 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
     val MAXIMUM_FROM = DateHelper.minusDaysTimestamp(3)
     val FLAG_STATION = "1020_Paris"
 
-    val contracts = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")
-
     val stations: KStream[String, Station] =
       builder.stream[String, GenericRecord](config.kafka.station_topic)(Consumed.`with`(stringSerde, CustomSerde.genericAvroSerde))
       .map {
@@ -229,7 +227,7 @@ object StationStateProcessor extends InteractiveQueryWorkflow {
           }
           station.externalId -> station
       }.filter {
-      (_, value) => contracts.contains(value.contract_name) && value.last_update > MAXIMUM_FROM
+      (_, value) => Station.filteredContracts.contains(value.contract_name) && value.last_update > MAXIMUM_FROM
     }
 
 
