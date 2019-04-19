@@ -81,7 +81,7 @@ object Station {
     state = None
   )
 
-  val filteredContracts: Seq[String] = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes")
+  val filteredContracts: Seq[String] = Seq("Lyon", "Paris", "Marseille", "Rouen", "Toulouse", "Luxembourg", "Amiens", "Nancy", "Creteil", "Nantes").map(_.toLowerCase())
 
 }
 
