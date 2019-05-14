@@ -59,14 +59,14 @@ class TickActor extends Actor {
   override def receive: Receive = {
     case FetchJcDecauxStations(service, producer) => service.getStationsList.andThen {
       case Success(response) =>
-        producer.sendRawResponseEvent(JCDecauxAPISource, response.fold(identity, identity), AllStationsEventType)
+          producer.sendRawResponseEvent(JCDecauxAPISource, response.fold(identity, identity), AllStationsEventType)
       case Failure(error) =>
-        println(error.getMessage)
         producer.sendRawResponseEvent(JCDecauxAPISource, error.getMessage, AllStationsEventType)
     }.map {
       case Right(response) =>
         val rawStations: Seq[Station] = Station.fromStationListJson(response).flatMap(_.right.toOption)
-          .filter(station => Station.filteredContracts.contains(station.contract_name.toLowerCase()))
+          .map(station => station.copy(contract_name = station.contract_name.capitalize))
+          .filter(station => Station.filteredContracts.contains(station.contract_name))
 
         val stationsWithoutDuplicates: Seq[Station] = rawStations
           .filterNot(station => currentStateJCDecaux.get(station.externalId).contains(station.last_update))

@@ -49,7 +49,7 @@ object TopStation {
   }
 
   def cleanupName(city: String, name: String): String = {
-    city match {
+    city.capitalize match {
       case "Luxembourg" => name.drop(7)
       case "Nancy" => name.split(" - ", 2).lift(1).getOrElse(name)
       case "Paris" => name
@@ -60,6 +60,7 @@ object TopStation {
       case "Amiens" => name.split("- ", 2).lift(1).getOrElse(name)
       case "Creteil" => name.split("-", 2).lift(1).getOrElse(name)
       case "Rouen" => name.split("-", 2).lift(1).getOrElse(name)
+      case _ => name
     }
   }
 }
