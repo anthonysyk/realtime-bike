@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-remoteHost="root@51.15.87.1"
+$remoteHost = $1
 
 sbt pack
 
